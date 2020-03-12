@@ -1,8 +1,8 @@
 # tsconfig-resolver
 
 [![GitHub Actions Build Status](https://github.com/ifiokjr/tsconfig-resolver/workflows/Node%20CI/badge.svg)](https://github.com/ifiokjr/tsconfig-resolver/actions?query=workflow%3A%22Node+CI%22)
-[![npm](https://img.shields.io/npm/dm/tsconfig-resolver.svg?&logo=npm)](https://www.npmjs.com/package/tsconfig-resolver)
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
+[![Version][version]][npm]
+[![Weekly Downloads][downloads-badge]][npm]
 [![Typed Codebase][typescript]](./src/index.ts)
 ![MIT License][license]
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
@@ -23,6 +23,7 @@
       - [Options](#options)
     - [`CacheStrategy`](#cachestrategy)
     - [`clearCache`](#clearcache)
+    - [Contributing](#contributing)
     - [Versioning](#versioning)
     - [License](#license)
     - [Contributors](#contributors)
@@ -156,3 +157,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
+[version]: https://flat.badgen.net/npm/v/#tsconfig-resolver
+[npm]: https://npmjs.com/package/#tsconfig-resolver
+[license]: https://flat.badgen.net/badge/license/MIT/purple
+[size]: https://bundlephobia.com/result?p=#tsconfig-resolver
+[size-badge]: https://flat.badgen.net/bundlephobia/minzip/#tsconfig-resolver
+[typescript]: https://flat.badgen.net/badge/icon/TypeScript/?icon=typescript&label&labelColor=blue&color=555555
+[downloads-badge]: https://badgen.net/npm/dw/#tsconfig-resolver/red?icon=npm
