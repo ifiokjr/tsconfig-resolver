@@ -15,8 +15,6 @@
 
 ## Table of Contents
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-
 - [tsconfig-resolver](#tsconfig-resolver)
   - [Table of Contents](#table-of-contents)
   - [Usage](#usage)
@@ -25,14 +23,13 @@
   - [API](#api)
     - [`tsconfigResolver`](#tsconfigresolver)
       - [Options](#options)
-    - [`CacheStrategy`](#cachestrategy)
     - [`clearCache`](#clearcache)
-    - [Contributing](#contributing)
-    - [Versioning](#versioning)
-    - [License](#license)
-    - [Contributors](#contributors)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+    - [`CacheStrategy`](#cachestrategy)
+    - [`TsConfigErrorReason`](#tsconfigerrorreason)
+  - [Contributing](#contributing)
+  - [Versioning](#versioning)
+  - [License](#license)
+  - [Contributors](#contributors)
 
 <br />
 
@@ -113,6 +110,21 @@ import { tsconfigResolver } from 'tsconfig-resolver';
 
 <br />
 
+### `clearCache`
+
+Clears the cache.
+
+```ts
+import { tsconfigResolver, clearCache } from 'tsconfig-resolver';
+
+const result = tsconfigResolver();
+
+// Now clear the cache.
+clearCache();
+```
+
+<br />
+
 ### `CacheStrategy`
 
 ```ts
@@ -129,22 +141,22 @@ To help prevent unnecessary lookups there are custom caching strategies availabl
 - `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `fileName`) which will be returned every time after that. This value will always be the same.
 - `CacheStrategy.Directory` - The cache will be used when the same directory (and `fileName`) is being searched.
 
-### `clearCache`
+<br />
 
-Clears the cache.
+### `TsConfigErrorReason`
 
 ```ts
-import { tsconfigResolver, clearCache } from 'tsconfig-resolver';
-
-const result = tsconfigResolver();
-
-// Now clear the cache.
-clearCache();
+import { TsConfigErrorReason } from 'tsconfig-resolver';
 ```
+
+This provides the reason for the error in resolving the `tsconfig`.
+
+- `TsConfigErrorReason.NotFound` - The `tsconfig` file could not be found.
+- `TsConfigErrorReason.InvalidConfig` - The file was found but the configuration was invalid.
 
 <br />
 
-### Contributing
+## Contributing
 
 Dive into the codebase with Gitpod.
 
@@ -152,21 +164,21 @@ Dive into the codebase with Gitpod.
 
 <br />
 
-### Versioning
+## Versioning
 
 This project uses [SemVer](http://semver.org/) for versioning. For the versions available, see the
 [tags on this repository](https://github.com/ifiokjr/tsconfig-resolver/tags).
 
 <br />
 
-### License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
 
-### Contributors
+## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 
