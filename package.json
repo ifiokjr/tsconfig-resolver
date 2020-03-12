@@ -1,8 +1,42 @@
 {
+  "name": "tsconfig-resolver",
+  "author": {
+    "name": "Ifiok Jr.",
+    "email": "ifiokotung@gmail.com",
+    "url": "ifiokjr.com"
+  },
   "version": "1.0.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
+  "keywords": [
+    "tsconfig",
+    "typescript",
+    "json",
+    "read",
+    "parse",
+    "file",
+    "fs",
+    "graceful",
+    "load",
+    "find",
+    "up",
+    "find-up",
+    "findup",
+    "look-up",
+    "look",
+    "search",
+    "match",
+    "resolve",
+    "parent",
+    "parents",
+    "folder",
+    "directory",
+    "walk",
+    "walking",
+    "path"
+  ],
+  "funding": "https://github.com/sponsors/ifiokjr",
   "files": [
     "src",
     "dist"
@@ -17,7 +51,8 @@
   "peerDependencies": {},
   "husky": {
     "hooks": {
-      "pre-commit": "tsdx lint"
+      "pre-commit": "tsdx lint",
+      "pre-push": "yarn tsc --noEmit && yarn lint && yarn test"
     }
   },
   "prettier": {
@@ -26,8 +61,6 @@
     "singleQuote": true,
     "trailingComma": "all"
   },
-  "name": "tsconfig-resolver",
-  "author": "Ifiok Jr.",
   "module": "dist/tsconfig-resolver.esm.js",
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.0",
@@ -70,9 +103,7 @@
         {
           "assets": [
             "package.json",
-            "CHANGELOG.md",
-            "dist",
-            "src"
+            "CHANGELOG.md"
           ],
           "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
         }

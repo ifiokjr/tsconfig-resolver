@@ -7,7 +7,11 @@
 ![MIT License][license]
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-> A tool for loading the nearest tsconfig file in the same way the TypeScript compiler does. It walks up the directory tree until it finds the first matching `tsconfig.json` file.
+<br />
+
+**A tool for loading the nearest tsconfig file in the same way the TypeScript compiler does. It walks up the directory tree until it finds the first matching `tsconfig.json` file.**
+
+<br />
 
 ## Table of Contents
 
@@ -30,9 +34,13 @@
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
+<br />
+
 ## Usage
 
 `tsconfig-resolver` is designed to be used inside your node project.
+
+<br />
 
 ### Setup
 
@@ -47,6 +55,8 @@ or
 ```bash
 yarn add tsconfig-resolver
 ```
+
+<br />
 
 ### Code Example
 
@@ -79,13 +89,19 @@ const result = tsconfig({
 });
 ```
 
+<br />
+
 ## API
+
+<br />
 
 ### `tsconfigResolver`
 
 ```ts
 import { tsconfigResolver } from 'tsconfig-resolver';
 ```
+
+<br />
 
 #### Options
 
@@ -94,6 +110,8 @@ import { tsconfigResolver } from 'tsconfig-resolver';
 | `cwd`           | string | `process.cwd()`       | The directory to start searching from                                                               |
 | `fileName`      | string | `'tsconfig.json'`     | Set the file name of the config file to search for.                                                 |
 | `cacheStrategy` | string | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found. See |
+
+<br />
 
 ### `CacheStrategy`
 
@@ -128,10 +146,9 @@ clearCache();
 
 ### Contributing
 
-Please read [contributing.md](docs/contributing.md) for details on our code of conduct, and the process for
-submitting pull requests.
+Dive into the codebase with Gitpod.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/remirror/remirror)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/ifiokjr/tsconfig-resolver)
 
 <br />
 
@@ -159,7 +176,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <!-- prettier-ignore-end -->
 
 [version]: https://flat.badgen.net/npm/v/#tsconfig-resolver
-[npm]: https://npmjs.com/package/#tsconfig-resolver
+[npm]: https://npmjs.com/package/tsconfig-resolver
 [license]: https://flat.badgen.net/badge/license/MIT/purple
 [size]: https://bundlephobia.com/result?p=#tsconfig-resolver
 [size-badge]: https://flat.badgen.net/bundlephobia/minzip/#tsconfig-resolver
