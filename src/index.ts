@@ -442,3 +442,5 @@ export const clearCache = () => {
     map.clear();
   }
 };
+
+export { TsConfigJson };

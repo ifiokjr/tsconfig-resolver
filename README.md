@@ -26,6 +26,7 @@
     - [`clearCache`](#clearcache)
     - [`CacheStrategy`](#cachestrategy)
     - [`TsConfigErrorReason`](#tsconfigerrorreason)
+    - [`TsConfigJson`](#tsconfigjson)
   - [Contributing](#contributing)
   - [Versioning](#versioning)
   - [License](#license)
@@ -155,6 +156,10 @@ This provides the reason for the error in resolving the `tsconfig`.
 - `TsConfigErrorReason.InvalidConfig` - The file was found but the configuration was invalid.
 
 <br />
+
+### `TsConfigJson`
+
+Re-exported from [`type-fest`](https://github.com/sindresorhus/type-fest).
 
 ## Contributing
 
