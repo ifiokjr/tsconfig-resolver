@@ -1,3 +1,10 @@
+## [1.1.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.0.1...v1.1.0) (2020-03-12)
+
+
+### Features
+
+* re-export `TsConfigJson` ([4dce11a](https://github.com/ifiokjr/tsconfig-resolver/commit/4dce11ac15137ca4e8dfe200217fbe99696ccc7e))
+
 ### [1.0.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.0.0...v1.0.1) (2020-03-12)
 
 
