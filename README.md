@@ -22,6 +22,7 @@
     - [Code Example](#code-example)
   - [API](#api)
     - [`tsconfigResolver`](#tsconfigresolver)
+      - [Returns](#returns)
       - [Options](#options)
     - [`clearCache`](#clearcache)
     - [`CacheStrategy`](#cachestrategy)
@@ -91,23 +92,30 @@ const result = tsconfig({
 
 ## API
 
-<br />
-
 ### `tsconfigResolver`
 
 ```ts
 import { tsconfigResolver } from 'tsconfig-resolver';
 ```
 
-<br />
+#### Returns
+
+The function returns an object consisting of the following.
+
+| Property   | Type                                 | Description                                                                                                                                                                                                                                                                                         |
+| ---------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **config** | `TsConfigJson` or `undefined`        | The configuration object. <ul><li>`undefined` when the tsconfig resolver failed and no configuration was found.</li><li>`TsConfigJson` (exported by the `type-fest` library) when the resolved tsconfig has been found and loaded.</li></ul>                                                        |
+| **exists** | `boolean`                            | Whether or not the configuration could be loaded. <ul><li>`false` when no tsconfig could be found.</li><li>`true` when a valid tsconfig file has been found and successfully loaded.</li></ul>                                                                                                      |
+| **reason** | `TsConfigErrorReason` or `undefined` | The reason for failure. <ul><li>`TsConfigErrorReason.NotFound` when the config failure is because the filename has not been found.</li><li>`TsConfigErrorReason.InvalidConfig` when the config failure is because of an invalid config.</li><li>`undefined` when no failure has occurred.</li></ul> |
+| **path**   | `string` or `undefined`              | The absolute path to the tsconfig.json or given filename.<ul><li>`undefined` when not found.</li><li>`string` when config json is invalid.</li><li>`string` when a valid tsconfig has been loaded.</li></ul>                                                                                        |
 
 #### Options
 
-| Property        | Type   | Default               | Description                                                                                         |
-| --------------- | ------ | --------------------- | --------------------------------------------------------------------------------------------------- |
-| `cwd`           | string | `process.cwd()`       | The directory to start searching from                                                               |
-| `fileName`      | string | `'tsconfig.json'`     | Set the file name of the config file to search for.                                                 |
-| `cacheStrategy` | string | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found. See |
+| Property          | Type     | Default               | Description                                                                                     |
+| ----------------- | -------- | --------------------- | ----------------------------------------------------------------------------------------------- |
+| **cwd**           | `string` | `process.cwd()`       | The directory to start searching from.                                                          |
+| **fileName**      | `string` | `'tsconfig.json'`     | Set the file name of the config file to search for.                                             |
+| **cacheStrategy** | `string` | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found. |
 
 <br />
 
@@ -196,6 +204,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [npm]: https://npmjs.com/package/tsconfig-resolver
 [license]: https://flat.badgen.net/badge/license/MIT/purple
 [size]: https://bundlephobia.com/result?p=#tsconfig-resolver
-[size-badge]: https://flat.badgen.net/bundlephobia/minzip/#tsconfig-resolver
+[size-badge]: https://flat.badgen.net/bundlephobia/minzip/tsconfig-resolver
 [typescript]: https://flat.badgen.net/badge/icon/TypeScript/?icon=typescript&label&labelColor=blue&color=555555
-[downloads-badge]: https://badgen.net/npm/dw/#tsconfig-resolver/red?icon=npm
+[downloads-badge]: https://badgen.net/npm/dw/tsconfig-resolver/red?icon=npm
