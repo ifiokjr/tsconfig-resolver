@@ -80,7 +80,6 @@
   },
   "dependencies": {
     "@types/json5": "^0.0.30",
-    "@types/resolve": "^1.14.0",
     "json5": "^2.1.1",
     "prettier-plugin-packagejson": "^2.0.10",
     "resolve": "^1.15.1",

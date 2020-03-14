@@ -2,12 +2,10 @@ import { existsSync, lstatSync, readFileSync, statSync } from 'fs';
 import JSON5 from 'json5';
 import { dirname, join, resolve } from 'path';
 import StripBom from 'strip-bom';
-import { TsConfigJson, Except, SetOptional } from 'type-fest';
+import { TsConfigJson, Except } from 'type-fest';
 import path from 'path';
-import resolvePackageNpm from 'resolve';
 
-/** The default search name used. */
-export const DEFAULT_SEARCH_NAME = 'tsconfig.json';
+const DEFAULT_FILENAME = 'tsconfig.json';
 
 interface IsNodeModuleRequireOptions {
   /**
@@ -145,7 +143,7 @@ export type TsConfigResult =
 export interface TsConfigLoaderParams {
   getEnv: (key: string) => string | undefined;
   cwd: string;
-  loadSync?(cwd: string, searchName?: string): TsConfigResult;
+  loadSync?(cwd: string, fileName?: string): TsConfigResult;
 }
 
 const walkForTsConfig = (directory: string): string | undefined => {
@@ -186,65 +184,15 @@ const isFile = (filePath: string) => {
   }
 };
 
-/**
- * Resolves an npm package by the given name.
- */
-const resolvePackage = (name: string, basedir?: string) => {
-  try {
-    return resolvePackageNpm.sync(name, {
-      basedir,
-      extensions: ['.json', '.js'],
-    });
-  } catch {
-    return;
-  }
-};
-
-/**
- * When a filePath exists check if it can be resolved.
- */
-const resolveFilePath = (
-  cwd: string,
-  searchName: string,
-  filePath?: string,
-): string | undefined => {
-  if (!filePath) {
-    return;
-  }
-
-  let resolvedPath: string | undefined;
-
-  if (filePath.startsWith('npm:')) {
-    resolvedPath = resolvePackage(filePath.replace('npm:', ''), cwd);
-  } else {
-    resolvedPath = resolve(cwd, filePath);
-  }
-
-  if (!resolvedPath || !isDirectory(resolvedPath)) {
-    return resolvedPath;
-  }
-
-  return resolve(resolvedPath, searchName);
-};
-
-/**
- * Get the desired path to the configuration.
- */
 const resolveConfigPath = (
   cwd: string,
-  searchName: string,
-  filePath?: string,
+  fileName: string = DEFAULT_FILENAME,
 ): string | undefined => {
-  const resolvedFilePath = resolveFilePath(cwd, searchName, filePath);
-  if (resolvedFilePath) {
-    return resolvedFilePath;
-  }
-
-  if (searchName !== DEFAULT_SEARCH_NAME) {
-    const resolvedSearchName = resolve(cwd, searchName);
-    const absolutePath = isDirectory(resolvedSearchName)
-      ? resolve(resolvedSearchName, 'tsconfig.json')
-      : resolvedSearchName;
+  if (fileName !== DEFAULT_FILENAME) {
+    const resolvedFileName = resolve(cwd, fileName);
+    const absolutePath = isDirectory(resolvedFileName)
+      ? resolve(resolvedFileName, 'tsconfig.json')
+      : resolvedFileName;
 
     return isFile(absolutePath) ? absolutePath : undefined;
   }
@@ -285,11 +233,9 @@ const loadTsConfig = (configFilePath: string): TsConfigJson | undefined => {
   let base: TsConfigJson;
 
   if (parseFilePath(extendedConfig).isPackage) {
-    const newConfigPath = resolvePackage(extendedConfig);
+    const newConfigPath = require.resolve(extendedConfig);
 
-    if (!newConfigPath) {
-      return config;
-    } else if (isDirectory(newConfigPath)) {
+    if (isDirectory(newConfigPath)) {
       extendedConfig = join(newConfigPath, 'tsconfig.json');
     } else if (isFile(newConfigPath)) {
       extendedConfig = newConfigPath;
@@ -336,26 +282,14 @@ export interface TsConfigResolverOptions {
   cwd?: string;
 
   /**
-   * The tsconfig file name to search for. This is where the `TsConfigJson`
-   * configuration object will be loaded from.
+   * The fileName to use.
    *
    * @default 'tsconfig.json'
    */
-  searchName?: string;
+  fileName?: string;
 
   /**
-   * A direct path to the tsconfig file you would like to load. The path will be
-   * relative to `cwd`. If it leads to a directory then the `searchName` will be appended.
-   *
-   * This also supports the `npm:` prefix which will find the given npm
-   * package directory, if it is installed.
-   *
-   * @default undefined
-   */
-  filePath?: string | undefined;
-
-  /**
-   * The caching strategy to use. `'never'` or `'always'` or `'directory'`.
+   * The caching strategy to use.
    *
    * @default 'never'
    *
@@ -371,11 +305,6 @@ export interface TsConfigResolverOptions {
   cacheStrategy?: CacheStrategyType;
 }
 
-type TsConfigResolverParams = SetOptional<
-  Required<TsConfigResolverOptions>,
-  'filePath'
->;
-
 export const CacheStrategy = {
   /**
    * Caching never happens and the returned value is always recalculated.
@@ -384,13 +313,13 @@ export const CacheStrategy = {
 
   /**
    * The first time the `tsconfigResolver` method is run it will save a cached
-   * value (by `searchName`) which will be returned every time after that. This
+   * value (by `fileName`) which will be returned every time after that. This
    * value will always be the same.
    */
   Always: 'always',
 
   /**
-   * The cache will be used when the same directory (and searchName) is being
+   * The cache will be used when the same directory (and fileName) is being
    * searched.
    */
   Directory: 'directory',
@@ -413,14 +342,14 @@ const cacheObject = {
 const getCache = ({
   cacheStrategy,
   cwd,
-  searchName,
-}: TsConfigResolverParams): TsConfigResult | undefined => {
+  fileName,
+}: Required<TsConfigResolverOptions>): TsConfigResult | undefined => {
   if (cacheStrategy === CacheStrategy.Always) {
-    return cacheObject[CacheStrategy.Always].get(searchName);
+    return cacheObject[CacheStrategy.Always].get(fileName);
   }
 
   if (cacheStrategy === CacheStrategy.Directory) {
-    return cacheObject[CacheStrategy.Always].get(join(cwd, searchName));
+    return cacheObject[CacheStrategy.Always].get(join(cwd, fileName));
   }
 
   return undefined;
@@ -430,13 +359,13 @@ const getCache = ({
  * Updates the cache with the provided result.
  */
 const updateCache = (
-  { cacheStrategy, cwd, searchName }: TsConfigResolverParams,
+  { cacheStrategy, cwd, fileName }: Required<TsConfigResolverOptions>,
   result: TsConfigResult,
 ): void => {
   if (cacheStrategy === CacheStrategy.Always) {
-    cacheObject[CacheStrategy.Always].set(searchName, result);
+    cacheObject[CacheStrategy.Always].set(fileName, result);
   } else if (cacheStrategy === CacheStrategy.Directory) {
-    cacheObject[CacheStrategy.Always].set(join(cwd, searchName), result);
+    cacheObject[CacheStrategy.Always].set(join(cwd, fileName), result);
   }
 };
 
@@ -445,10 +374,11 @@ const updateCache = (
  */
 const getTsConfigResult = ({
   cwd,
-  searchName,
-  filePath,
-}: Except<TsConfigResolverParams, 'cacheStrategy'>): TsConfigResult => {
-  const configPath = resolveConfigPath(cwd, searchName, filePath);
+  fileName,
+}: Required<
+  Except<TsConfigResolverOptions, 'cacheStrategy'>
+>): TsConfigResult => {
+  const configPath = resolveConfigPath(cwd, fileName);
 
   if (!configPath) {
     return {
@@ -476,7 +406,7 @@ const getTsConfigResult = ({
 
 /**
  * Resolve the `tsconfig` file synchronously. Walks up the file tree until it
- * finds a file that matches the searchName.
+ * finds a file that matches the fileName.
  *
  * @param options - `TsConfigResolverOptions`.
  *
@@ -484,23 +414,22 @@ const getTsConfigResult = ({
  *
  * @remarks
  *
- * If a non-default caching strategy is provided the returned result might be
+ * If a none default caching strategy is provided the returned result might be
  * from the cache instead.
  */
 export function tsconfigResolver({
   cwd = process.cwd(),
   cacheStrategy = CacheStrategy.Never,
-  searchName = DEFAULT_SEARCH_NAME,
-  filePath,
+  fileName = DEFAULT_FILENAME,
 }: TsConfigResolverOptions = {}): TsConfigResult {
-  const cache = getCache({ cwd, cacheStrategy, searchName, filePath });
+  const cache = getCache({ cwd, cacheStrategy, fileName });
 
   if (cache) {
     return cache;
   }
 
-  const result = getTsConfigResult({ cwd, searchName, filePath });
-  updateCache({ cwd, cacheStrategy, searchName, filePath }, result);
+  const result = getTsConfigResult({ cwd, fileName });
+  updateCache({ cwd, cacheStrategy, fileName }, result);
 
   return result;
 }
