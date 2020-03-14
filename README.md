@@ -114,9 +114,9 @@ The function returns an object consisting of the following.
 | Property          | Type     | Default               | Description                                                                                                                                                                                                                                                                    |
 | ----------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **cwd**           | `string` | `process.cwd()`       | The directory to start searching from.                                                                                                                                                                                                                                         |
-| **searchName**    | `string` | `'tsconfig.json'`     | The tsconfig file name to search for. This is where the `TsConfigJson` configuration object will be loaded from.                                                                                                                                                               |
-| **filePath**      | `string` | `undefined`           | A direct path to the tsconfig file you would like to load. The path will be relative to `cwd`. If it leads to a directory then the `searchName` will be appended. \* This also supports the `npm:` prefix which will find the given npm package directory, if it is installed. |
-| **cacheStrategy** | `string` | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found.                                                                                                                                                                                |
+| **searchName**    | `string` | `'tsconfig.json'`     | The tsconfig file name to search for. This is where the `TsConfigJson` configuration object will be loaded from.                                                                                                                                                               |`
+| **filePath**      | `string` | `undefined`           | A direct path to the tsconfig file you would like to load. The path will be resolved relative to the current `process.cwd()`. If it leads to a directory then the `searchName` will be appended. \* This also supports the `npm:` prefix which will find the given npm package directory, if it is installed. When provided the `cacheStrategy` is set to `'always'` by default. |
+| **cacheStrategy** | `string` | `'never'` | Set the caching strategy that will be used when searching for a file that's already been found. When a `filePath` is provided the default value becomes `'always'`.                                                                                                                                                                                 |
 
 <br />
 
@@ -148,7 +148,7 @@ Sometimes you'll want to run this module several times during runtime but it can
 To help prevent unnecessary lookups there are custom caching strategies available.
 
 - `CacheStrategy.Never` - Caching never happens and the returned value is always recalculated
-- `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `searchName`) which will be returned every time after that. This value will always be the same.
+- `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `searchName`) which will be returned every time after that. This value will always be the same. This is turned on by default when a `filePath` is provided.
 - `CacheStrategy.Directory` - The cache will be used when the same directory (and `searchName`) is being searched.
 
 <br />

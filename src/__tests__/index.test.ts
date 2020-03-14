@@ -5,6 +5,8 @@ const processCwd = jest.spyOn(process, 'cwd');
 const fixtures = (...paths: string[]) =>
   join(__dirname, '__fixtures__', ...paths);
 
+afterEach(clearCache);
+
 describe('resolver', () => {
   beforeEach(() => {
     processCwd.mockReturnValue(fixtures('basic'));
@@ -291,11 +293,25 @@ describe('caching', () => {
     expect(result4).not.toBe(result1);
   });
 
+  it('caches by default when using a filePath', () => {
+    const result1 = tsconfigResolver({
+      filePath: 'cachedir/tsconfig.json',
+    });
+    const result2 = tsconfigResolver({
+      cwd: fixtures('basic', 'subdir'),
+      filePath: 'cachedir/tsconfig.json',
+    });
+
+    expect(result1).toBe(result2);
+  });
+
   it('supports clearing the cache', () => {
     const result1 = tsconfigResolver({
       cacheStrategy: CacheStrategy.Always,
     });
+
     clearCache();
+
     const result2 = tsconfigResolver({
       cacheStrategy: CacheStrategy.Always,
     });

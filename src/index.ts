@@ -204,10 +204,10 @@ const resolvePackage = (name: string, basedir?: string) => {
  * When a filePath exists check if it can be resolved.
  */
 const resolveFilePath = (
-  cwd: string,
   searchName: string,
   filePath?: string,
 ): string | undefined => {
+  const cwd = process.cwd();
   if (!filePath) {
     return;
   }
@@ -235,7 +235,7 @@ const resolveConfigPath = (
   searchName: string,
   filePath?: string,
 ): string | undefined => {
-  const resolvedFilePath = resolveFilePath(cwd, searchName, filePath);
+  const resolvedFilePath = resolveFilePath(searchName, filePath);
   if (resolvedFilePath) {
     return resolvedFilePath;
   }
@@ -488,10 +488,10 @@ const getTsConfigResult = ({
  * from the cache instead.
  */
 export function tsconfigResolver({
-  cwd = process.cwd(),
-  cacheStrategy = CacheStrategy.Never,
-  searchName = DEFAULT_SEARCH_NAME,
   filePath,
+  cwd = process.cwd(),
+  cacheStrategy = filePath ? CacheStrategy.Always : CacheStrategy.Never,
+  searchName = DEFAULT_SEARCH_NAME,
 }: TsConfigResolverOptions = {}): TsConfigResult {
   const cache = getCache({ cwd, cacheStrategy, searchName, filePath });
 
