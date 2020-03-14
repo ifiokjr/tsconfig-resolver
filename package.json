@@ -1,5 +1,6 @@
 {
   "name": "tsconfig-resolver",
+  "description": "Walk up the tree to resolve `tsconfig.json` configuration objects.",
   "author": {
     "name": "Ifiok Jr.",
     "email": "ifiokotung@gmail.com",
