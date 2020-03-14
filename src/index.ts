@@ -279,7 +279,10 @@ const parseTsConfigJson = (jsonString: string): TsConfigJson | undefined => {
 /**
  * Loads a tsconfig file while also resolving the extends path.
  */
-const loadTsConfig = (configFilePath: string): TsConfigJson | undefined => {
+const loadTsConfig = (
+  configFilePath: string,
+  ignoreExtends = false,
+): TsConfigJson | undefined => {
   if (!existsSync(configFilePath)) return undefined;
 
   const configString = readFileSync(configFilePath, 'utf8');
@@ -287,7 +290,7 @@ const loadTsConfig = (configFilePath: string): TsConfigJson | undefined => {
   const config = parseTsConfigJson(jsonString);
   let extendedConfig = config?.extends;
 
-  if (!config || !extendedConfig) return config;
+  if (!config || !extendedConfig || ignoreExtends) return config;
 
   let base: TsConfigJson;
 
@@ -376,6 +379,15 @@ export interface TsConfigResolverOptions {
    * available. See {@link CacheStrategy}.
    */
   cacheStrategy?: CacheStrategyType;
+
+  /**
+   * When true will not automatically populate the `extends` argument. This is
+   * useful if all you want is the json object and not the fully resolved
+   * configuration.
+   *
+   * @default false
+   */
+  ignoreExtends?: boolean;
 }
 
 type TsConfigResolverParams = SetOptional<
@@ -413,21 +425,29 @@ const cacheObject = {
   [CacheStrategy.Directory]: new Map<string, TsConfigResult>(),
 };
 
+const cacheKey = ({
+  cacheStrategy,
+  cwd,
+  searchName,
+  ignoreExtends,
+}: Exclude<TsConfigResolverParams, 'filePath'>) =>
+  cacheStrategy === CacheStrategy.Always
+    ? `${searchName} - ${ignoreExtends}`
+    : `${join(cwd, searchName)} - ${ignoreExtends}`;
+
 /**
  * Based on the options passed in, retrieve the value from the cache or return
  * undefined if the value still needs to be calculated.
  */
-const getCache = ({
-  cacheStrategy,
-  cwd,
-  searchName,
-}: TsConfigResolverParams): TsConfigResult | undefined => {
-  if (cacheStrategy === CacheStrategy.Always) {
-    return cacheObject[CacheStrategy.Always].get(searchName);
+const getCache = (
+  options: TsConfigResolverParams,
+): TsConfigResult | undefined => {
+  if (options.cacheStrategy === CacheStrategy.Always) {
+    return cacheObject[CacheStrategy.Always].get(cacheKey(options));
   }
 
-  if (cacheStrategy === CacheStrategy.Directory) {
-    return cacheObject[CacheStrategy.Always].get(join(cwd, searchName));
+  if (options.cacheStrategy === CacheStrategy.Directory) {
+    return cacheObject[CacheStrategy.Always].get(cacheKey(options));
   }
 
   return undefined;
@@ -437,13 +457,13 @@ const getCache = ({
  * Updates the cache with the provided result.
  */
 const updateCache = (
-  { cacheStrategy, cwd, searchName }: TsConfigResolverParams,
+  options: TsConfigResolverParams,
   result: TsConfigResult,
 ): void => {
-  if (cacheStrategy === CacheStrategy.Always) {
-    cacheObject[CacheStrategy.Always].set(searchName, result);
-  } else if (cacheStrategy === CacheStrategy.Directory) {
-    cacheObject[CacheStrategy.Always].set(join(cwd, searchName), result);
+  if (options.cacheStrategy === CacheStrategy.Always) {
+    cacheObject[CacheStrategy.Always].set(cacheKey(options), result);
+  } else if (options.cacheStrategy === CacheStrategy.Directory) {
+    cacheObject[CacheStrategy.Always].set(cacheKey(options), result);
   }
 };
 
@@ -454,6 +474,7 @@ const getTsConfigResult = ({
   cwd,
   searchName,
   filePath,
+  ignoreExtends,
 }: Except<TsConfigResolverParams, 'cacheStrategy'>): TsConfigResult => {
   const configPath = resolveConfigPath(cwd, searchName, filePath);
 
@@ -464,7 +485,7 @@ const getTsConfigResult = ({
     };
   }
 
-  const config = loadTsConfig(configPath);
+  const config = loadTsConfig(configPath, ignoreExtends);
 
   if (!config) {
     return {
@@ -499,15 +520,30 @@ export function tsconfigResolver({
   cwd = process.cwd(),
   cacheStrategy = filePath ? CacheStrategy.Always : CacheStrategy.Never,
   searchName = DEFAULT_SEARCH_NAME,
+  ignoreExtends = false,
 }: TsConfigResolverOptions = {}): TsConfigResult {
-  const cache = getCache({ cwd, cacheStrategy, searchName, filePath });
+  const cache = getCache({
+    cwd,
+    cacheStrategy,
+    searchName,
+    filePath,
+    ignoreExtends,
+  });
 
   if (cache) {
     return cache;
   }
 
-  const result = getTsConfigResult({ cwd, searchName, filePath });
-  updateCache({ cwd, cacheStrategy, searchName, filePath }, result);
+  const result = getTsConfigResult({
+    cwd,
+    searchName,
+    filePath,
+    ignoreExtends,
+  });
+  updateCache(
+    { cwd, cacheStrategy, searchName, filePath, ignoreExtends },
+    result,
+  );
 
   return result;
 }

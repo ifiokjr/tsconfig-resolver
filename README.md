@@ -78,9 +78,8 @@ if (result.exists) {
 Configuration options can also be passed into the export function.
 
 ```ts
-import { tsconfigResolver, CacheStrategy } from 'tsconfig-resolver';
 import { join } from 'path';
-
+import { CacheStrategy, tsconfigResolver } from 'tsconfig-resolver';
 const result = tsconfig({
   cwd: join(__dirname, 'src'),
   fileName: 'tsconfig.prod.json',
@@ -111,12 +110,13 @@ The function returns an object consisting of the following.
 
 #### Options
 
-| Property          | Type     | Default               | Description                                                                                                                                                                                                                                                                    |
-| ----------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **cwd**           | `string` | `process.cwd()`       | The directory to start searching from.                                                                                                                                                                                                                                         |
-| **searchName**    | `string` | `'tsconfig.json'`     | The tsconfig file name to search for. This is where the `TsConfigJson` configuration object will be loaded from.                                                                                                                                                               |`
-| **filePath**      | `string` | `undefined`           | A direct path to the tsconfig file you would like to load. The path will be resolved relative to the current `process.cwd()`. If it leads to a directory then the `searchName` will be appended. \* This also supports the `npm:` prefix which will find the given npm package directory, if it is installed. When provided the `cacheStrategy` is set to `'always'` by default. |
-| **cacheStrategy** | `string` | `'never'` | Set the caching strategy that will be used when searching for a file that's already been found. When a `filePath` is provided the default value becomes `'always'`.                                                                                                                                                                                 |
+| Property          | Type      | Default           | Description                                                                                                                                                                                                                                                                                                                                                                      |
+| ----------------- | --------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **cwd**           | `string`  | `process.cwd()`   | The directory to start searching from.                                                                                                                                                                                                                                                                                                                                           |
+| **searchName**    | `string`  | `'tsconfig.json'` | The tsconfig file name to search for. This is where the `TsConfigJson` configuration object will be loaded from.                                                                                                                                                                                                                                                                 | ` |
+| **filePath**      | `string`  | `undefined`       | A direct path to the tsconfig file you would like to load. The path will be resolved relative to the current `process.cwd()`. If it leads to a directory then the `searchName` will be appended. \* This also supports the `npm:` prefix which will find the given npm package directory, if it is installed. When provided the `cacheStrategy` is set to `'always'` by default. |
+| **cacheStrategy** | `string`  | `'never'`         | Set the caching strategy that will be used when searching for a file that's already been found. When a `filePath` is provided the default value becomes `'always'`.                                                                                                                                                                                                              |
+| **ignoreExtends** | `boolean` | `false`           | When true will not automatically populate the `extends` argument. This is useful if all you want is the json object and not the fully resolved configuration.                                                                                                                                                                                                                    |
 
 <br />
 
@@ -125,7 +125,7 @@ The function returns an object consisting of the following.
 Clears the cache.
 
 ```ts
-import { tsconfigResolver, clearCache } from 'tsconfig-resolver';
+import { clearCache, tsconfigResolver } from 'tsconfig-resolver';
 
 const result = tsconfigResolver();
 

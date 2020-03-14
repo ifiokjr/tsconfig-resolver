@@ -227,6 +227,19 @@ describe('extends', () => {
     `);
   });
 
+  it('can ignore extends', () => {
+    const { config } = tsconfigResolver({
+      searchName: 'tsconfig.npm.json',
+      ignoreExtends: true,
+    });
+
+    expect(config).toMatchInlineSnapshot(`
+      Object {
+        "extends": "@sindresorhus/tsconfig",
+      }
+    `);
+  });
+
   it('supports nested extends', () => {
     const { config } = tsconfigResolver({
       cwd: fixtures('extends', 'nested'),
@@ -304,6 +317,19 @@ describe('caching', () => {
     });
 
     expect(result1).toBe(result2);
+  });
+
+  it('separates cache by `ignoreExtends` property', () => {
+    const result1 = tsconfigResolver({
+      cacheStrategy: CacheStrategy.Always,
+    });
+
+    const result2 = tsconfigResolver({
+      ignoreExtends: true,
+      cacheStrategy: CacheStrategy.Always,
+    });
+
+    expect(result1).not.toBe(result2);
   });
 
   it('supports clearing the cache', () => {
