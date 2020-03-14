@@ -5,7 +5,7 @@ const processCwd = jest.spyOn(process, 'cwd');
 const fixtures = (...paths: string[]) =>
   join(__dirname, '__fixtures__', ...paths);
 
-describe('basic', () => {
+describe('resolver', () => {
   beforeEach(() => {
     processCwd.mockReturnValue(fixtures('basic'));
   });
@@ -40,9 +40,9 @@ describe('basic', () => {
       `);
   });
 
-  it('resolves with a custom fileName', () => {
+  it('resolves with a custom `searchName`', () => {
     const { exists, config, path } = tsconfigResolver({
-      fileName: 'tsconfig.alt.json',
+      searchName: 'tsconfig.alt.json',
     });
 
     expect(path?.endsWith('__fixtures__/basic/tsconfig.alt.json')).toBe(true);
@@ -56,8 +56,8 @@ describe('basic', () => {
     `);
   });
 
-  it('appends `tsconfig.json` when `fileName` is a directory', () => {
-    const result = tsconfigResolver({ fileName: 'cachedir' });
+  it('appends `tsconfig.json` when `searchName` is a directory', () => {
+    const result = tsconfigResolver({ searchName: 'cachedir' });
 
     expect(
       result.path?.endsWith('__fixtures__/basic/cachedir/tsconfig.json'),
@@ -73,7 +73,7 @@ describe('basic', () => {
 
   it('properly resolves invalid json', () => {
     const { exists, reason } = tsconfigResolver({
-      fileName: 'tsconfig.invalid.json',
+      searchName: 'tsconfig.invalid.json',
     });
 
     expect(exists).toBe(false);
@@ -82,11 +82,73 @@ describe('basic', () => {
 
   it('properly resolves missing config', () => {
     const { exists, reason } = tsconfigResolver({
-      fileName: 'tsconfig.missing.json',
+      searchName: 'tsconfig.missing.json',
     });
 
     expect(exists).toBe(false);
     expect(reason).toBe('not-found');
+  });
+
+  it('returns the config found by a custom `filePath`', () => {
+    const result = tsconfigResolver({
+      filePath: 'specific/custom.json',
+    });
+
+    expect(
+      result.path?.endsWith('__fixtures__/basic/specific/custom.json'),
+    ).toBe(true);
+    expect(result.config).toMatchInlineSnapshot(`
+      Object {
+        "custom": "yes",
+      }
+    `);
+  });
+
+  it('defaults to `tsconfig.json` when `filePath` is a directory', () => {
+    const result = tsconfigResolver({
+      filePath: './specific',
+    });
+
+    expect(
+      result.path?.endsWith('__fixtures__/basic/specific/tsconfig.json'),
+    ).toBe(true);
+    expect(result.config).toMatchInlineSnapshot(`
+      Object {
+        "compilerOptions": Object {
+          "baseUrl": "specific",
+        },
+      }
+    `);
+  });
+
+  it('allows `filePath` to be prefixed with `npm:` for npm packages', () => {
+    const result = tsconfigResolver({
+      filePath: 'npm:@sindresorhus/tsconfig',
+    });
+
+    expect(result.config).toMatchInlineSnapshot(`
+      Object {
+        "compilerOptions": Object {
+          "declaration": true,
+          "forceConsistentCasingInFileNames": true,
+          "jsx": "react",
+          "module": "commonjs",
+          "moduleResolution": "node",
+          "newLine": "lf",
+          "noEmitOnError": true,
+          "noFallthroughCasesInSwitch": true,
+          "noImplicitReturns": true,
+          "noUnusedLocals": true,
+          "noUnusedParameters": true,
+          "pretty": true,
+          "resolveJsonModule": true,
+          "skipLibCheck": true,
+          "strict": true,
+          "stripInternal": true,
+          "target": "es2017",
+        },
+      }
+    `);
   });
 });
 
@@ -116,7 +178,7 @@ describe('extends', () => {
 
   it('extends and removes paths', () => {
     const { config } = tsconfigResolver({
-      fileName: 'tsconfig.paths.json',
+      searchName: 'tsconfig.paths.json',
     });
 
     expect(config).toMatchInlineSnapshot(`
@@ -133,7 +195,7 @@ describe('extends', () => {
 
   it('extends from npm', () => {
     const { config } = tsconfigResolver({
-      fileName: 'tsconfig.npm.json',
+      searchName: 'tsconfig.npm.json',
     });
 
     expect(config).toMatchInlineSnapshot(`
@@ -192,7 +254,7 @@ describe('caching', () => {
     processCwd.mockReturnValue(fixtures('basic'));
   });
 
-  it('supports fileName caching', () => {
+  it('supports searchName caching', () => {
     const result1 = tsconfigResolver({
       cacheStrategy: CacheStrategy.Always,
     });
@@ -202,7 +264,7 @@ describe('caching', () => {
     });
     const result3 = tsconfigResolver({
       cacheStrategy: CacheStrategy.Always,
-      fileName: 'fake',
+      searchName: 'fake',
     });
     expect(result1).toBe(result2);
     expect(result3).not.toBe(result2);
@@ -221,7 +283,7 @@ describe('caching', () => {
     });
     const result4 = tsconfigResolver({
       cacheStrategy: CacheStrategy.Directory,
-      fileName: 'fake',
+      searchName: 'fake',
     });
 
     expect(result1).not.toBe(result2);

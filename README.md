@@ -111,11 +111,12 @@ The function returns an object consisting of the following.
 
 #### Options
 
-| Property          | Type     | Default               | Description                                                                                     |
-| ----------------- | -------- | --------------------- | ----------------------------------------------------------------------------------------------- |
-| **cwd**           | `string` | `process.cwd()`       | The directory to start searching from.                                                          |
-| **fileName**      | `string` | `'tsconfig.json'`     | Set the file name of the config file to search for.                                             |
-| **cacheStrategy** | `string` | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found. |
+| Property          | Type     | Default               | Description                                                                                                                                                                                                                                                                    |
+| ----------------- | -------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **cwd**           | `string` | `process.cwd()`       | The directory to start searching from.                                                                                                                                                                                                                                         |
+| **searchName**    | `string` | `'tsconfig.json'`     | The tsconfig file name to search for. This is where the `TsConfigJson` configuration object will be loaded from.                                                                                                                                                               |
+| **filePath**      | `string` | `undefined`           | A direct path to the tsconfig file you would like to load. The path will be relative to `cwd`. If it leads to a directory then the `searchName` will be appended. \* This also supports the `npm:` prefix which will find the given npm package directory, if it is installed. |
+| **cacheStrategy** | `string` | `CacheStrategy.Never` | Set the caching strategy that will be used when searching for a file that's already been found.                                                                                                                                                                                |
 
 <br />
 
@@ -147,8 +148,8 @@ Sometimes you'll want to run this module several times during runtime but it can
 To help prevent unnecessary lookups there are custom caching strategies available.
 
 - `CacheStrategy.Never` - Caching never happens and the returned value is always recalculated
-- `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `fileName`) which will be returned every time after that. This value will always be the same.
-- `CacheStrategy.Directory` - The cache will be used when the same directory (and `fileName`) is being searched.
+- `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `searchName`) which will be returned every time after that. This value will always be the same.
+- `CacheStrategy.Directory` - The cache will be used when the same directory (and `searchName`) is being searched.
 
 <br />
 
@@ -200,7 +201,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
 
-[version]: https://flat.badgen.net/npm/v/#tsconfig-resolver
+[version]: https://flat.badgen.net/npm/v/tsconfig-resolver
 [npm]: https://npmjs.com/package/tsconfig-resolver
 [license]: https://flat.badgen.net/badge/license/MIT/purple
 [size]: https://bundlephobia.com/result?p=#tsconfig-resolver
