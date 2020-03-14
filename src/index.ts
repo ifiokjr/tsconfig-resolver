@@ -1,10 +1,17 @@
 import { existsSync, lstatSync, readFileSync, statSync } from 'fs';
+import {
+  ParsedPath,
+  dirname,
+  join,
+  parse as pathParse,
+  win32 as pathWin32,
+  resolve,
+} from 'path';
+
 import JSON5 from 'json5';
-import { dirname, join, resolve } from 'path';
-import StripBom from 'strip-bom';
-import { TsConfigJson, Except, SetOptional } from 'type-fest';
-import path from 'path';
 import resolvePackageNpm from 'resolve';
+import StripBom from 'strip-bom';
+import { Except, SetOptional, TsConfigJson } from 'type-fest';
 
 /** The default search name used. */
 export const DEFAULT_SEARCH_NAME = 'tsconfig.json';
@@ -37,9 +44,9 @@ interface ParseFilePath {
 const parseFilePath = (
   file: string,
   { windows }: IsNodeModuleRequireOptions = {},
-): path.ParsedPath & ParseFilePath => {
+): ParsedPath & ParseFilePath => {
   const isWindows = windows ?? process.platform === 'win32';
-  const parser = isWindows ? path.win32.parse : path.parse;
+  const parser = isWindows ? pathWin32.parse : pathParse;
   const parsedPath = parser(file);
 
   return {

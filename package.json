@@ -1,15 +1,7 @@
 {
   "name": "tsconfig-resolver",
-  "description": "Walk up the tree to resolve `tsconfig.json` configuration objects.",
-  "author": {
-    "name": "Ifiok Jr.",
-    "email": "ifiokotung@gmail.com",
-    "url": "https://ifiokjr.com"
-  },
   "version": "2.1.0",
-  "license": "MIT",
-  "main": "dist/index.js",
-  "typings": "dist/index.d.ts",
+  "description": "Walk up the tree to resolve `tsconfig.json` configuration objects.",
   "keywords": [
     "tsconfig",
     "typescript",
@@ -38,18 +30,26 @@
     "path"
   ],
   "funding": "https://github.com/sponsors/ifiokjr",
+  "license": "MIT",
+  "author": {
+    "name": "Ifiok Jr.",
+    "email": "ifiokotung@gmail.com",
+    "url": "https://ifiokjr.com"
+  },
   "files": [
     "src",
     "dist"
   ],
+  "main": "dist/index.js",
+  "module": "dist/tsconfig-resolver.esm.js",
+  "typings": "dist/index.d.ts",
   "scripts": {
-    "start": "tsdx watch",
     "build": "tsdx build",
-    "test": "tsdx test",
     "lint": "tsdx lint",
-    "prepare": "tsdx build"
+    "prepare": "tsdx build",
+    "start": "tsdx watch",
+    "test": "tsdx test"
   },
-  "peerDependencies": {},
   "husky": {
     "hooks": {
       "pre-commit": "tsdx lint",
@@ -57,15 +57,27 @@
     }
   },
   "prettier": {
+    "plugins": [
+      "prettier-plugin-packagejson",
+      "prettier-plugin-sorted"
+    ],
     "printWidth": 80,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "all",
-    "plugins": [
-      "prettier-plugin-packagejson"
-    ]
+    "trailingComma": "all"
   },
-  "module": "dist/tsconfig-resolver.esm.js",
+  "resolutions": {
+    "mem": ">=4",
+    "minimist": ">=1.2.2"
+  },
+  "dependencies": {
+    "@types/json5": "^0.0.30",
+    "@types/resolve": "^1.14.0",
+    "json5": "^2.1.1",
+    "resolve": "^1.15.1",
+    "strip-bom": "^4.0.0",
+    "type-fest": "^0.12.0"
+  },
   "devDependencies": {
     "@semantic-release/changelog": "^5.0.0",
     "@semantic-release/git": "^9.0.0",
@@ -74,20 +86,14 @@
     "conventional-changelog-conventionalcommits": "^4.2.3",
     "husky": "^4.2.3",
     "lint-staged": "^10.0.8",
+    "prettier-plugin-packagejson": "^2.0.10",
+    "prettier-plugin-sorted": "^1.1.0",
     "semantic-release": "^17.0.4",
     "tsdx": "^0.12.3",
     "tslib": "^1.11.1",
     "typescript": "^3.8.3"
   },
-  "dependencies": {
-    "@types/json5": "^0.0.30",
-    "@types/resolve": "^1.14.0",
-    "json5": "^2.1.1",
-    "prettier-plugin-packagejson": "^2.0.10",
-    "resolve": "^1.15.1",
-    "strip-bom": "^4.0.0",
-    "type-fest": "^0.12.0"
-  },
+  "peerDependencies": {},
   "release": {
     "plugins": [
       [
@@ -116,9 +122,5 @@
         }
       ]
     ]
-  },
-  "resolutions": {
-    "mem": ">=4",
-    "minimist": ">=1.2.2"
   }
 }

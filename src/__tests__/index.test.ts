@@ -1,5 +1,6 @@
 import { join } from 'path';
-import { tsconfigResolver, CacheStrategy, clearCache } from '..';
+
+import { CacheStrategy, clearCache, tsconfigResolver } from '..';
 
 const processCwd = jest.spyOn(process, 'cwd');
 const fixtures = (...paths: string[]) =>
