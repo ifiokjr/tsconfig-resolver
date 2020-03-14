@@ -59,7 +59,10 @@
     "printWidth": 80,
     "semi": true,
     "singleQuote": true,
-    "trailingComma": "all"
+    "trailingComma": "all",
+    "plugins": [
+      "prettier-plugin-packagejson"
+    ]
   },
   "module": "dist/tsconfig-resolver.esm.js",
   "devDependencies": {
@@ -79,6 +82,7 @@
     "@types/json5": "^0.0.30",
     "@types/resolve": "^1.14.0",
     "json5": "^2.1.1",
+    "prettier-plugin-packagejson": "^2.0.10",
     "resolve": "^1.15.1",
     "strip-bom": "^4.0.0",
     "type-fest": "^0.12.0"
@@ -113,6 +117,7 @@
     ]
   },
   "resolutions": {
-    "mem": ">=4"
+    "mem": ">=4",
+    "minimist": ">=1.2.2"
   }
 }
