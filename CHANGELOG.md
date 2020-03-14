@@ -1,3 +1,10 @@
+### [2.1.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.1.0...v2.1.1) (2020-03-14)
+
+
+### Bug Fixes
+
+*  move `prettier-pulugin-packagejson` to `devDependencies` ([0426a2c](https://github.com/ifiokjr/tsconfig-resolver/commit/0426a2cb71d2358c89796fffee795b905cdc05c4))
+
 ## [2.1.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.0.1...v2.1.0) (2020-03-14)
 
 
