@@ -1,3 +1,10 @@
+## [1.2.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.1.0...v1.2.0) (2020-03-14)
+
+
+### Features
+
+* **api:** `filePath` option sets direct path to tsconfig ([bc7b2fe](https://github.com/ifiokjr/tsconfig-resolver/commit/bc7b2fe3bbd12b71d69e8ab9df5f8da5a0864923))
+
 ## [1.1.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.0.1...v1.1.0) (2020-03-12)
 
 
