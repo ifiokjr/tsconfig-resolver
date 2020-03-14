@@ -1,3 +1,10 @@
+## [2.1.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.0.1...v2.1.0) (2020-03-14)
+
+
+### Features
+
+* default to `always` cache when `filePath` used ([3fc605c](https://github.com/ifiokjr/tsconfig-resolver/commit/3fc605c8b40c7973787417e5708966abe0108121))
+
 ### [2.0.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.0.0...v2.0.1) (2020-03-14)
 
 

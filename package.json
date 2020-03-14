@@ -6,7 +6,7 @@
     "email": "ifiokotung@gmail.com",
     "url": "https://ifiokjr.com"
   },
-  "version": "2.0.1",
+  "version": "2.1.0",
   "license": "MIT",
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
