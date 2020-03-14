@@ -1,3 +1,10 @@
+### [2.0.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.0.0...v2.0.1) (2020-03-14)
+
+
+### Bug Fixes
+
+* update package description ([f09eb23](https://github.com/ifiokjr/tsconfig-resolver/commit/f09eb2338efd02733ac7bde12787423279e93182))
+
 ## [2.0.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.2.1...v2.0.0) (2020-03-14)
 
 
