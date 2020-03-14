@@ -1,3 +1,19 @@
+## [2.0.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.2.1...v2.0.0) (2020-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* This changes the previously named `fileName` option to
+`searchName`.
+
+- Adds a new configuration option `filePath` which is a direct path to
+  the tsconfig file that should be loaded.
+- Export the `DEFAULT_SEARCH_NAME` constant.
+
+### Features
+
+* `filePath` option for direct path to tsconfig ([bcde047](https://github.com/ifiokjr/tsconfig-resolver/commit/bcde0474451917bd73eb111ee3710bac87740fc2))
+
 ### [1.2.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v1.2.0...v1.2.1) (2020-03-14)
 
 
