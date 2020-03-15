@@ -94,6 +94,14 @@ interface TsConfigFailure {
    *   configuration.
    */
   extendedPaths?: undefined;
+
+  /**
+   * The `isCircular` config flag.
+   *
+   * - `undefined` when the tsconfig resolver failed to load a valid
+   *   configuration.
+   */
+  isCircular?: undefined;
 }
 
 export interface TsConfigFailureNotFound extends TsConfigFailure {
@@ -144,6 +152,13 @@ export interface TsConfigResultSuccess {
    * - `[]` an empty array when `ignoreExtends` options is set to true.
    */
   extendedPaths: string[];
+
+  /**
+   * - `true` when a circular `extends` property was encountered (an extends
+   *   path chain that references itself).
+   * - `false` when no circular `extends` property was encountered.
+   */
+  isCircular: boolean;
 
   /**
    * - `TsConfigJson` when the resolved tsconfig has been found and loaded.
@@ -533,6 +548,7 @@ const getTsConfigResult = ({
     path: configPath,
     extendedPaths,
     config,
+    isCircular: extendedPaths.includes(configPath),
   };
 };
 

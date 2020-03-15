@@ -277,8 +277,8 @@ describe('extends', () => {
     `);
   });
 
-  it('handles circular extends', () => {
-    const { config, extendedPaths } = tsconfigResolver({
+  it('handles `circular` extends', () => {
+    const { config, extendedPaths, isCircular } = tsconfigResolver({
       searchName: 'circular.tsconfig.json',
     });
 
@@ -287,6 +287,7 @@ describe('extends', () => {
       fixtures('extends', 'circular.tsconfig.json'),
     ]);
 
+    expect(isCircular).toBe(true);
     expect(config).toMatchInlineSnapshot(`
       Object {
         "compilerOptions": Object {
