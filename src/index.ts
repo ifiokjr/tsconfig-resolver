@@ -86,6 +86,14 @@ interface TsConfigFailure {
    *   found.
    */
   config?: undefined;
+
+  /**
+   * The extendedPaths array.
+   *
+   * - `undefined` when the tsconfig resolver failed to load a valid
+   *   configuration.
+   */
+  extendedPaths?: undefined;
 }
 
 export interface TsConfigFailureNotFound extends TsConfigFailure {
@@ -128,6 +136,14 @@ export interface TsConfigResultSuccess {
    * - `string` when a valid tsconfig has been loaded.
    */
   path: string;
+
+  /**
+   * - `string[]` of absolute paths to resolved tsconfig files when extended
+   *   paths are encountered.
+   * - `[]` an empty array when no extended paths were encountered.
+   * - `[]` an empty array when `ignoreExtends` options is set to true.
+   */
+  extendedPaths: string[];
 
   /**
    * - `TsConfigJson` when the resolved tsconfig has been found and loaded.
@@ -281,6 +297,7 @@ const parseTsConfigJson = (jsonString: string): TsConfigJson | undefined => {
  */
 const loadTsConfig = (
   configFilePath: string,
+  extendedPaths: string[],
   ignoreExtends = false,
 ): TsConfigJson | undefined => {
   if (!existsSync(configFilePath)) return undefined;
@@ -307,14 +324,16 @@ const loadTsConfig = (
       extendedConfig = `${newConfigPath}.json`;
     }
 
-    base = loadTsConfig(extendedConfig) ?? {};
+    extendedPaths.push(extendedConfig);
+    base = loadTsConfig(extendedConfig, extendedPaths) ?? {};
   } else {
     if (!extendedConfig.endsWith('.json')) {
       extendedConfig += '.json';
     }
 
     const currentDir = dirname(configFilePath);
-    base = loadTsConfig(join(currentDir, extendedConfig)) ?? {};
+    extendedPaths.push(join(currentDir, extendedConfig));
+    base = loadTsConfig(join(currentDir, extendedConfig), extendedPaths) ?? {};
   }
 
   // baseUrl should be interpreted as relative to the base tsconfig, but we need
@@ -355,10 +374,11 @@ export interface TsConfigResolverOptions {
 
   /**
    * A direct path to the tsconfig file you would like to load. The path will be
-   * relative to `cwd`. If it leads to a directory then the `searchName` will be appended.
+   * relative to `cwd`. If it leads to a directory then the `searchName` will be
+   * appended.
    *
-   * This also supports the `npm:` prefix which will find the given npm
-   * package directory, if it is installed.
+   * This also supports the `npm:` prefix which will find the given npm package
+   * directory, if it is installed.
    *
    * @default undefined
    */
@@ -485,7 +505,10 @@ const getTsConfigResult = ({
     };
   }
 
-  const config = loadTsConfig(configPath, ignoreExtends);
+  // This path will be mutated to include all paths that have been found.
+  const extendedPaths: string[] = [];
+
+  const config = loadTsConfig(configPath, extendedPaths, ignoreExtends);
 
   if (!config) {
     return {
@@ -498,6 +521,7 @@ const getTsConfigResult = ({
   return {
     exists: true,
     path: configPath,
+    extendedPaths,
     config,
   };
 };

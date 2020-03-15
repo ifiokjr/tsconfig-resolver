@@ -179,10 +179,14 @@ describe('extends', () => {
     `);
   });
 
-  it('extends and removes paths', () => {
-    const { config } = tsconfigResolver({
+  it('extends and resolves paths', () => {
+    const { config, extendedPaths } = tsconfigResolver({
       searchName: 'tsconfig.paths.json',
     });
+
+    expect(extendedPaths).toEqual([
+      fixtures('extends', './base.tsconfig.json'),
+    ]);
 
     expect(config).toMatchInlineSnapshot(`
       Object {
@@ -197,9 +201,11 @@ describe('extends', () => {
   });
 
   it('extends from npm', () => {
-    const { config } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolver({
       searchName: 'tsconfig.npm.json',
     });
+
+    expect(extendedPaths).toEqual([require.resolve('@sindresorhus/tsconfig')]);
 
     expect(config).toMatchInlineSnapshot(`
       Object {
@@ -228,10 +234,12 @@ describe('extends', () => {
   });
 
   it('can ignore extends', () => {
-    const { config } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolver({
       searchName: 'tsconfig.npm.json',
       ignoreExtends: true,
     });
+
+    expect(extendedPaths).toEqual([]);
 
     expect(config).toMatchInlineSnapshot(`
       Object {
@@ -241,9 +249,14 @@ describe('extends', () => {
   });
 
   it('supports nested extends', () => {
-    const { config } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolver({
       cwd: fixtures('extends', 'nested'),
     });
+
+    expect(extendedPaths).toEqual([
+      fixtures('extends', 'tsconfig.paths.json'),
+      fixtures('extends', 'base.tsconfig.json'),
+    ]);
 
     expect(config).toMatchInlineSnapshot(`
       Object {
