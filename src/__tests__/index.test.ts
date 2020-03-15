@@ -276,6 +276,27 @@ describe('extends', () => {
       }
     `);
   });
+
+  it('handles circular extends', () => {
+    const { config, extendedPaths } = tsconfigResolver({
+      searchName: 'circular.tsconfig.json',
+    });
+
+    expect(extendedPaths).toEqual([
+      fixtures('extends', 'circular2.tsconfig.json'),
+      fixtures('extends', 'circular.tsconfig.json'),
+    ]);
+
+    expect(config).toMatchInlineSnapshot(`
+      Object {
+        "compilerOptions": Object {
+          "allowJs": true,
+          "baseUrl": "oops",
+        },
+        "extends": "./circular2.tsconfig.json",
+      }
+    `);
+  });
 });
 
 describe('caching', () => {

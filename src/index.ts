@@ -317,11 +317,15 @@ const loadTsConfig = (
     if (!newConfigPath) {
       return config;
     } else if (isDirectory(newConfigPath)) {
-      extendedConfig = join(newConfigPath, 'tsconfig.json');
+      extendedConfig = join(newConfigPath, DEFAULT_SEARCH_NAME);
     } else if (isFile(newConfigPath)) {
       extendedConfig = newConfigPath;
     } else if (isFile(`${newConfigPath}.json`)) {
       extendedConfig = `${newConfigPath}.json`;
+    }
+
+    if (extendedPaths.includes(extendedConfig)) {
+      return config;
     }
 
     extendedPaths.push(extendedConfig);
@@ -332,8 +336,14 @@ const loadTsConfig = (
     }
 
     const currentDir = dirname(configFilePath);
-    extendedPaths.push(join(currentDir, extendedConfig));
-    base = loadTsConfig(join(currentDir, extendedConfig), extendedPaths) ?? {};
+    const extendedConfigPath = join(currentDir, extendedConfig);
+
+    if (extendedPaths.includes(extendedConfigPath)) {
+      return config;
+    }
+
+    extendedPaths.push(extendedConfigPath);
+    base = loadTsConfig(extendedConfigPath, extendedPaths) ?? {};
   }
 
   // baseUrl should be interpreted as relative to the base tsconfig, but we need
