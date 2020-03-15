@@ -1,5 +1,11 @@
 # tsconfig-resolver
 
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
+
 [![GitHub Actions Build Status](https://github.com/ifiokjr/tsconfig-resolver/workflows/Node%20CI/badge.svg)](https://github.com/ifiokjr/tsconfig-resolver/actions?query=workflow%3A%22Node+CI%22)
 [![Version][version]][npm]
 [![Weekly Downloads][downloads-badge]][npm]
@@ -191,17 +197,21 @@ This project uses [SemVer](http://semver.org/) for versioning. For the versions 
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-
 ## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://ifiokjr.com"><img src="https://avatars2.githubusercontent.com/u/1160934?v=4" width="100px;" alt=""/><br /><sub><b>Ifiok Jr.</b></sub></a><br /><a href="https://github.com/ifiokjr/tsconfig-resolver/commits?author=ifiokjr" title="Code">💻</a></td>
+  </tr>
+</table>
 
 <!-- markdownlint-enable -->
 <!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 [version]: https://flat.badgen.net/npm/v/tsconfig-resolver
 [npm]: https://npmjs.com/package/tsconfig-resolver

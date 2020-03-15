@@ -1,16 +1,14 @@
 ## [2.2.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.1.1...v2.2.0) (2020-03-15)
 
-
 ### Features
 
-* new option `ignoreExtends` ([9fbd1b4](https://github.com/ifiokjr/tsconfig-resolver/commit/9fbd1b438c8bfe0677af5f79dda7c4d95706f1df))
-* new return property `extendedPaths` ([ee0fd1a](https://github.com/ifiokjr/tsconfig-resolver/commit/ee0fd1acf05500c8af8c653c350baec61e3d7c8d))
-* new returned property `isCircular` ([85b220a](https://github.com/ifiokjr/tsconfig-resolver/commit/85b220a95eae5b526a804f738ffd71644a55fad6))
-
+- new option `ignoreExtends` ([9fbd1b4](https://github.com/ifiokjr/tsconfig-resolver/commit/9fbd1b438c8bfe0677af5f79dda7c4d95706f1df))
+- new return property `extendedPaths` ([ee0fd1a](https://github.com/ifiokjr/tsconfig-resolver/commit/ee0fd1acf05500c8af8c653c350baec61e3d7c8d))
+- new returned property `isCircular` ([85b220a](https://github.com/ifiokjr/tsconfig-resolver/commit/85b220a95eae5b526a804f738ffd71644a55fad6))
 
 ### Bug Fixes
 
-* circular `extends` property causing crash ([ae908c2](https://github.com/ifiokjr/tsconfig-resolver/commit/ae908c2aabdce575f0faff913585c61806296aec))
+- circular `extends` property causing crash ([ae908c2](https://github.com/ifiokjr/tsconfig-resolver/commit/ae908c2aabdce575f0faff913585c61806296aec))
 
 ### [2.1.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.1.0...v2.1.1) (2020-03-14)
 
