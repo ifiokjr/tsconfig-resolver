@@ -307,14 +307,14 @@ describe('caching', () => {
 
   it('supports searchName caching', () => {
     const result1 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
     const result2 = tsconfigResolver({
       cwd: fixtures('basic', 'cachedir'),
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
     const result3 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
       searchName: 'fake',
     });
     expect(result1).toBe(result2);
@@ -323,17 +323,17 @@ describe('caching', () => {
 
   it('support directory caching', () => {
     const result1 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Directory,
+      cache: CacheStrategy.Directory,
     });
     const result2 = tsconfigResolver({
       cwd: fixtures('basic', 'subdir'),
-      cacheStrategy: CacheStrategy.Directory,
+      cache: CacheStrategy.Directory,
     });
     const result3 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Directory,
+      cache: CacheStrategy.Directory,
     });
     const result4 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Directory,
+      cache: CacheStrategy.Directory,
       searchName: 'fake',
     });
 
@@ -356,12 +356,12 @@ describe('caching', () => {
 
   it('separates cache by `ignoreExtends` property', () => {
     const result1 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
 
     const result2 = tsconfigResolver({
       ignoreExtends: true,
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
 
     expect(result1).not.toBe(result2);
@@ -369,13 +369,13 @@ describe('caching', () => {
 
   it('supports clearing the cache', () => {
     const result1 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
 
     clearCache();
 
     const result2 = tsconfigResolver({
-      cacheStrategy: CacheStrategy.Always,
+      cache: CacheStrategy.Always,
     });
 
     expect(result1).not.toBe(result2);

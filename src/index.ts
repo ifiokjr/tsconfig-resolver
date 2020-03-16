@@ -410,7 +410,11 @@ export interface TsConfigResolverOptions {
   filePath?: string | undefined;
 
   /**
-   * The caching strategy to use. `'never'` or `'always'` or `'directory'`.
+   * The caching strategy to use. `'never'` or `'always'` or `'directory'` or
+   * `true` or `false`.
+   *
+   * `true` is the same as `'always'`
+   * `false` is the same as `'never'`
    *
    * @default 'never'
    *
@@ -423,7 +427,7 @@ export interface TsConfigResolverOptions {
    * To help prevent unnecessary lookups there are custom caching strategies
    * available. See {@link CacheStrategy}.
    */
-  cacheStrategy?: CacheStrategyType;
+  cache?: CacheStrategyType | boolean;
 
   /**
    * When true will not automatically populate the `extends` argument. This is
@@ -436,9 +440,9 @@ export interface TsConfigResolverOptions {
 }
 
 type TsConfigResolverParams = SetOptional<
-  Required<TsConfigResolverOptions>,
+  Required<Except<TsConfigResolverOptions, 'cache'>>,
   'filePath'
->;
+> & { cache: CacheStrategyType };
 
 export const CacheStrategy = {
   /**
@@ -470,13 +474,26 @@ const cacheObject = {
   [CacheStrategy.Directory]: new Map<string, TsConfigResult>(),
 };
 
+/**
+ * Converts a boolean or string type into a cache strategy.
+ */
+const convertCacheToStrategy = (value: boolean | CacheStrategyType) =>
+  value === false
+    ? CacheStrategy.Never
+    : value === true
+    ? CacheStrategy.Always
+    : value;
+
+/**
+ * Get the key to store in the cache.
+ */
 const cacheKey = ({
-  cacheStrategy,
+  cache,
   cwd,
   searchName,
   ignoreExtends,
 }: Exclude<TsConfigResolverParams, 'filePath'>) =>
-  cacheStrategy === CacheStrategy.Always
+  cache === CacheStrategy.Always
     ? `${searchName} - ${ignoreExtends}`
     : `${join(cwd, searchName)} - ${ignoreExtends}`;
 
@@ -487,11 +504,11 @@ const cacheKey = ({
 const getCache = (
   options: TsConfigResolverParams,
 ): TsConfigResult | undefined => {
-  if (options.cacheStrategy === CacheStrategy.Always) {
+  if (options.cache === CacheStrategy.Always) {
     return cacheObject[CacheStrategy.Always].get(cacheKey(options));
   }
 
-  if (options.cacheStrategy === CacheStrategy.Directory) {
+  if (options.cache === CacheStrategy.Directory) {
     return cacheObject[CacheStrategy.Always].get(cacheKey(options));
   }
 
@@ -505,9 +522,9 @@ const updateCache = (
   options: TsConfigResolverParams,
   result: TsConfigResult,
 ): void => {
-  if (options.cacheStrategy === CacheStrategy.Always) {
+  if (options.cache === CacheStrategy.Always) {
     cacheObject[CacheStrategy.Always].set(cacheKey(options), result);
-  } else if (options.cacheStrategy === CacheStrategy.Directory) {
+  } else if (options.cache === CacheStrategy.Directory) {
     cacheObject[CacheStrategy.Always].set(cacheKey(options), result);
   }
 };
@@ -520,7 +537,7 @@ const getTsConfigResult = ({
   searchName,
   filePath,
   ignoreExtends,
-}: Except<TsConfigResolverParams, 'cacheStrategy'>): TsConfigResult => {
+}: Except<TsConfigResolverParams, 'cache'>): TsConfigResult => {
   const configPath = resolveConfigPath(cwd, searchName, filePath);
 
   if (!configPath) {
@@ -568,13 +585,14 @@ const getTsConfigResult = ({
 export function tsconfigResolver({
   filePath,
   cwd = process.cwd(),
-  cacheStrategy = filePath ? CacheStrategy.Always : CacheStrategy.Never,
+  cache: shouldCache = filePath ? CacheStrategy.Always : CacheStrategy.Never,
   searchName = DEFAULT_SEARCH_NAME,
   ignoreExtends = false,
 }: TsConfigResolverOptions = {}): TsConfigResult {
+  const cacheStrategy = convertCacheToStrategy(shouldCache);
   const cache = getCache({
     cwd,
-    cacheStrategy,
+    cache: cacheStrategy,
     searchName,
     filePath,
     ignoreExtends,
@@ -591,7 +609,7 @@ export function tsconfigResolver({
     ignoreExtends,
   });
   updateCache(
-    { cwd, cacheStrategy, searchName, filePath, ignoreExtends },
+    { cwd, cache: cacheStrategy, searchName, filePath, ignoreExtends },
     result,
   );
 
