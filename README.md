@@ -15,7 +15,7 @@
 
 <br />
 
-**A tool for loading the nearest tsconfig file in the same way the TypeScript compiler does. It walks up the directory tree until it finds the first matching `tsconfig.json` file.**
+> A tool for loading the nearest tsconfig file in the same way the TypeScript compiler does. It walks up the directory tree until it finds the first matching `tsconfig.json` file.
 
 <br />
 
@@ -27,9 +27,10 @@
     - [Setup](#setup)
     - [Code Example](#code-example)
   - [API](#api)
-    - [`tsconfigResolver`](#tsconfigresolver)
+    - [`tsconfigResolverSync`](#tsconfigresolversync)
       - [Returns](#returns)
       - [Options](#options)
+    - [`tsconfigResolver`](#tsconfigresolver)
     - [`clearCache`](#clearcache)
     - [`CacheStrategy`](#cachestrategy)
     - [`TsConfigErrorReason`](#tsconfigerrorreason)
@@ -43,7 +44,7 @@
 
 ## Usage
 
-`tsconfig-resolver` is designed to be used inside your node project.
+`tsconfig-resolver` is designed to be used inside your node project. It automatically populates the extends field so that the configuration received is the same as would be used by any consuming TypeScript project.
 
 <br />
 
@@ -70,7 +71,7 @@ The following will load the first `tsconfig.json` file working upwards from the 
 ```ts
 import { tsconfigResolver } from 'tsconfig-resolver';
 
-const result = tsconfigResolver();
+const result = await tsconfigResolver();
 
 // without type narrowing
 console.log(result?.config);
@@ -97,10 +98,10 @@ const result = tsconfig({
 
 ## API
 
-### `tsconfigResolver`
+### `tsconfigResolverSync`
 
 ```ts
-import { tsconfigResolver } from 'tsconfig-resolver';
+import { tsconfigResolverSync } from 'tsconfig-resolver';
 ```
 
 #### Returns
@@ -126,7 +127,13 @@ The function returns an object consisting of the following.
 | **cache**         | `string` or `boolean` | `'never'`         | Set the caching strategy that will be used when searching for a file that's already been found. When a `filePath` is provided the default value becomes `'always'`.                                                                                                                                                                                                      |
 | **ignoreExtends** | `boolean`             | `false`           | When true will not automatically populate the `extends` argument. This is useful if all you want is the json object and not the fully resolved configuration.                                                                                                                                                                                                            |
 
-<br />
+### `tsconfigResolver`
+
+```ts
+import { tsconfigResolver } from 'tsconfig-resolver';
+```
+
+The same API as `tsconfigResolverSync` except the return value is wrapped in a promise.
 
 ### `clearCache`
 
@@ -135,13 +142,11 @@ Clears the cache.
 ```ts
 import { clearCache, tsconfigResolver } from 'tsconfig-resolver';
 
-const result = tsconfigResolver();
+const result = await tsconfigResolver();
 
 // Now clear the cache.
 clearCache();
 ```
-
-<br />
 
 ### `CacheStrategy`
 
@@ -159,8 +164,6 @@ To help prevent unnecessary lookups there are custom caching strategies availabl
 - `CacheStrategy.Always` - The first time the `tsconfigResolver` method is run it will save a cached value (by `searchName`) which will be returned every time after that. This value will always be the same. This is turned on by default when a `filePath` is provided.
 - `CacheStrategy.Directory` - The cache will be used when the same directory (and `searchName`) is being searched.
 
-<br />
-
 ### `TsConfigErrorReason`
 
 ```ts
@@ -172,11 +175,11 @@ This provides the reason for the error in resolving the `tsconfig`.
 - `TsConfigErrorReason.NotFound` - The `tsconfig` file could not be found.
 - `TsConfigErrorReason.InvalidConfig` - The file was found but the configuration was invalid.
 
-<br />
-
 ### `TsConfigJson`
 
 Re-exported from [`type-fest`](https://github.com/sindresorhus/type-fest).
+
+<br />
 
 ## Contributing
 
