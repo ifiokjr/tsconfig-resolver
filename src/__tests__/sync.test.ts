@@ -1,6 +1,6 @@
 import { join } from 'path';
 
-import { CacheStrategy, clearCache, tsconfigResolver } from '..';
+import { CacheStrategy, clearCache, tsconfigResolverSync } from '..';
 
 const processCwd = jest.spyOn(process, 'cwd');
 const fixtures = (...paths: string[]) =>
@@ -14,7 +14,7 @@ describe('resolver', () => {
   });
 
   it('resolves the tsconfig by default', () => {
-    const { exists, config, path } = tsconfigResolver();
+    const { exists, config, path } = tsconfigResolverSync();
 
     expect(path?.endsWith('__fixtures__/basic/tsconfig.json')).toBe(true);
     expect(exists).toBe(true);
@@ -30,7 +30,7 @@ describe('resolver', () => {
   it('resolves from a sub directory', () => {
     processCwd.mockReturnValue(fixtures('basic', 'subdir'));
 
-    const { exists, config, path } = tsconfigResolver();
+    const { exists, config, path } = tsconfigResolverSync();
 
     expect(path?.endsWith('__fixtures__/basic/tsconfig.json')).toBe(true);
     expect(exists).toBe(true);
@@ -44,7 +44,7 @@ describe('resolver', () => {
   });
 
   it('resolves with a custom `searchName`', () => {
-    const { exists, config, path } = tsconfigResolver({
+    const { exists, config, path } = tsconfigResolverSync({
       searchName: 'tsconfig.alt.json',
     });
 
@@ -60,7 +60,7 @@ describe('resolver', () => {
   });
 
   it('appends `tsconfig.json` when `searchName` is a directory', () => {
-    const result = tsconfigResolver({ searchName: 'cachedir' });
+    const result = tsconfigResolverSync({ searchName: 'cachedir' });
 
     expect(
       result.path?.endsWith('__fixtures__/basic/cachedir/tsconfig.json'),
@@ -75,7 +75,7 @@ describe('resolver', () => {
   });
 
   it('properly resolves invalid json', () => {
-    const { exists, reason } = tsconfigResolver({
+    const { exists, reason } = tsconfigResolverSync({
       searchName: 'tsconfig.invalid.json',
     });
 
@@ -84,7 +84,7 @@ describe('resolver', () => {
   });
 
   it('properly resolves missing config', () => {
-    const { exists, reason } = tsconfigResolver({
+    const { exists, reason } = tsconfigResolverSync({
       searchName: 'tsconfig.missing.json',
     });
 
@@ -93,7 +93,7 @@ describe('resolver', () => {
   });
 
   it('returns the config found by a custom `filePath`', () => {
-    const result = tsconfigResolver({
+    const result = tsconfigResolverSync({
       filePath: 'specific/custom.json',
     });
 
@@ -108,7 +108,7 @@ describe('resolver', () => {
   });
 
   it('defaults to `tsconfig.json` when `filePath` is a directory', () => {
-    const result = tsconfigResolver({
+    const result = tsconfigResolverSync({
       filePath: './specific',
     });
 
@@ -125,7 +125,7 @@ describe('resolver', () => {
   });
 
   it('allows `filePath` to be prefixed with `npm:` for npm packages', () => {
-    const result = tsconfigResolver({
+    const result = tsconfigResolverSync({
       filePath: 'npm:@sindresorhus/tsconfig',
     });
 
@@ -161,7 +161,7 @@ describe('extends', () => {
   });
 
   it('extends a base config', () => {
-    const { config } = tsconfigResolver();
+    const { config } = tsconfigResolverSync();
 
     expect(config).toMatchInlineSnapshot(`
       Object {
@@ -180,7 +180,7 @@ describe('extends', () => {
   });
 
   it('extends and resolves paths', () => {
-    const { config, extendedPaths } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolverSync({
       searchName: 'tsconfig.paths.json',
     });
 
@@ -201,7 +201,7 @@ describe('extends', () => {
   });
 
   it('extends from npm', () => {
-    const { config, extendedPaths } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolverSync({
       searchName: 'tsconfig.npm.json',
     });
 
@@ -234,7 +234,7 @@ describe('extends', () => {
   });
 
   it('can ignore extends', () => {
-    const { config, extendedPaths } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolverSync({
       searchName: 'tsconfig.npm.json',
       ignoreExtends: true,
     });
@@ -249,7 +249,7 @@ describe('extends', () => {
   });
 
   it('supports nested extends', () => {
-    const { config, extendedPaths } = tsconfigResolver({
+    const { config, extendedPaths } = tsconfigResolverSync({
       cwd: fixtures('extends', 'nested'),
     });
 
@@ -278,7 +278,7 @@ describe('extends', () => {
   });
 
   it('handles `circular` extends', () => {
-    const { config, extendedPaths, isCircular } = tsconfigResolver({
+    const { config, extendedPaths, isCircular } = tsconfigResolverSync({
       searchName: 'circular.tsconfig.json',
     });
 
@@ -306,14 +306,14 @@ describe('caching', () => {
   });
 
   it('supports searchName caching', () => {
-    const result1 = tsconfigResolver({
+    const result1 = tsconfigResolverSync({
       cache: CacheStrategy.Always,
     });
-    const result2 = tsconfigResolver({
+    const result2 = tsconfigResolverSync({
       cwd: fixtures('basic', 'cachedir'),
       cache: CacheStrategy.Always,
     });
-    const result3 = tsconfigResolver({
+    const result3 = tsconfigResolverSync({
       cache: CacheStrategy.Always,
       searchName: 'fake',
     });
@@ -322,17 +322,17 @@ describe('caching', () => {
   });
 
   it('support directory caching', () => {
-    const result1 = tsconfigResolver({
+    const result1 = tsconfigResolverSync({
       cache: CacheStrategy.Directory,
     });
-    const result2 = tsconfigResolver({
+    const result2 = tsconfigResolverSync({
       cwd: fixtures('basic', 'subdir'),
       cache: CacheStrategy.Directory,
     });
-    const result3 = tsconfigResolver({
+    const result3 = tsconfigResolverSync({
       cache: CacheStrategy.Directory,
     });
-    const result4 = tsconfigResolver({
+    const result4 = tsconfigResolverSync({
       cache: CacheStrategy.Directory,
       searchName: 'fake',
     });
@@ -343,10 +343,10 @@ describe('caching', () => {
   });
 
   it('caches by default when using a filePath', () => {
-    const result1 = tsconfigResolver({
+    const result1 = tsconfigResolverSync({
       filePath: 'cachedir/tsconfig.json',
     });
-    const result2 = tsconfigResolver({
+    const result2 = tsconfigResolverSync({
       cwd: fixtures('basic', 'subdir'),
       filePath: 'cachedir/tsconfig.json',
     });
@@ -355,11 +355,11 @@ describe('caching', () => {
   });
 
   it('separates cache by `ignoreExtends` property', () => {
-    const result1 = tsconfigResolver({
+    const result1 = tsconfigResolverSync({
       cache: CacheStrategy.Always,
     });
 
-    const result2 = tsconfigResolver({
+    const result2 = tsconfigResolverSync({
       ignoreExtends: true,
       cache: CacheStrategy.Always,
     });
@@ -368,13 +368,13 @@ describe('caching', () => {
   });
 
   it('supports clearing the cache', () => {
-    const result1 = tsconfigResolver({
+    const result1 = tsconfigResolverSync({
       cache: CacheStrategy.Always,
     });
 
     clearCache();
 
-    const result2 = tsconfigResolver({
+    const result2 = tsconfigResolverSync({
       cache: CacheStrategy.Always,
     });
 

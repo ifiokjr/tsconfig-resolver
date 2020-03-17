@@ -1,4 +1,4 @@
-import { existsSync, lstatSync, readFileSync, statSync } from 'fs';
+import { promises, readFileSync, statSync } from 'fs';
 import {
   ParsedPath,
   dirname,
@@ -12,6 +12,8 @@ import JSON5 from 'json5';
 import resolvePackageNpm from 'resolve';
 import StripBom from 'strip-bom';
 import { Except, SetOptional, TsConfigJson } from 'type-fest';
+
+const { readFile, stat } = promises;
 
 /** The default search name used. */
 export const DEFAULT_SEARCH_NAME = 'tsconfig.json';
@@ -186,12 +188,37 @@ export interface TsConfigLoaderParams {
   loadSync?(cwd: string, searchName?: string): TsConfigResult;
 }
 
-const walkForTsConfig = (directory: string): string | undefined => {
+/**
+ * Synchronously walk up the path until a `tsconfig` is located.
+ */
+const walkForTsConfigSync = (directory: string): string | undefined => {
   const configPath = join(directory, './tsconfig.json');
-  if (existsSync(configPath)) {
+  if (isFileOrDirectorySync(configPath)) {
     return configPath;
   }
 
+  const parentDirectory = join(directory, '../');
+
+  // If we reached the top
+  if (directory === parentDirectory) {
+    return undefined;
+  }
+
+  return walkForTsConfigSync(parentDirectory);
+};
+
+/**
+ * Walk up the path until a `tsconfig` is located.
+ */
+const walkForTsConfig = async (
+  directory: string,
+): Promise<string | undefined> => {
+  const configPath = join(directory, './tsconfig.json');
+  if (await isFileOrDirectory(configPath)) {
+    return configPath;
+  }
+
+  // Step up one level in the directory path.
   const parentDirectory = join(directory, '../');
 
   // If we reached the top
@@ -203,11 +230,34 @@ const walkForTsConfig = (directory: string): string | undefined => {
 };
 
 /**
+ * Synchronously check that the passed string is a directory.
+ */
+const isDirectorySync = (directory: string) => {
+  try {
+    return statSync(directory).isDirectory();
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Check that the passed string is a directory.
  */
-const isDirectory = (directory: string) => {
+const isDirectory = async (directory: string) => {
   try {
-    return lstatSync(directory).isDirectory();
+    const stats = await stat(directory);
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * Synchronously check that the passed filePath is a valid file.
+ */
+const isFileSync = (filePath: string) => {
+  try {
+    return statSync(filePath).isFile();
   } catch {
     return false;
   }
@@ -216,18 +266,40 @@ const isDirectory = (directory: string) => {
 /**
  * Check that the passed filePath is a valid file.
  */
-const isFile = (filePath: string) => {
+const isFile = async (filePath: string) => {
   try {
-    return lstatSync(filePath).isFile();
+    const stats = await stat(filePath);
+    return stats.isFile();
   } catch {
     return false;
   }
 };
 
 /**
- * Resolves an npm package by the given name.
+ * Synchronously check that the provided `filePath` is a file or directory.
  */
-const resolvePackage = (name: string, basedir?: string) => {
+const isFileOrDirectorySync = (filePath: string) =>
+  isFileSync(filePath) || isDirectorySync(filePath);
+
+/**
+ * Check that the provided `filePath` is a file or directory.
+ */
+const isFileOrDirectory = async (filePath: string) => {
+  if (await isFile(filePath)) {
+    return true;
+  }
+
+  if (await isDirectory(filePath)) {
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Synchronously resolves an npm package by the given name.
+ */
+const resolvePackageSync = (name: string, basedir?: string) => {
   try {
     return resolvePackageNpm.sync(name, {
       basedir,
@@ -239,9 +311,31 @@ const resolvePackage = (name: string, basedir?: string) => {
 };
 
 /**
- * When a filePath exists check if it can be resolved.
+ * Resolves an npm package by the given name.
  */
-const resolveFilePath = (
+const resolvePackage = (name: string, basedir?: string) => {
+  return new Promise<string | undefined>((resolve, reject) => {
+    resolvePackageNpm(
+      name,
+      {
+        basedir,
+        extensions: ['.json', '.js'],
+      },
+      (error, resolved) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(resolved);
+        }
+      },
+    );
+  });
+};
+
+/**
+ * Synchronously checks a filePath exists and if it can be resolved.
+ */
+const resolveFilePathSync = (
   searchName: string,
   filePath?: string,
 ): string | undefined => {
@@ -253,12 +347,39 @@ const resolveFilePath = (
   let resolvedPath: string | undefined;
 
   if (filePath.startsWith('npm:')) {
-    resolvedPath = resolvePackage(filePath.replace('npm:', ''), cwd);
+    resolvedPath = resolvePackageSync(filePath.replace('npm:', ''), cwd);
   } else {
     resolvedPath = resolve(cwd, filePath);
   }
 
-  if (!resolvedPath || !isDirectory(resolvedPath)) {
+  if (!resolvedPath || !isDirectorySync(resolvedPath)) {
+    return resolvedPath;
+  }
+
+  return resolve(resolvedPath, searchName);
+};
+
+/**
+ * When a filePath exists check if it can be resolved.
+ */
+const resolveFilePath = async (
+  searchName: string,
+  filePath?: string,
+): Promise<string | undefined> => {
+  const cwd = process.cwd();
+  if (!filePath) {
+    return;
+  }
+
+  let resolvedPath: string | undefined;
+
+  if (filePath.startsWith('npm:')) {
+    resolvedPath = await resolvePackage(filePath.replace('npm:', ''), cwd);
+  } else {
+    resolvedPath = resolve(cwd, filePath);
+  }
+
+  if (!resolvedPath || !(await isDirectory(resolvedPath))) {
     return resolvedPath;
   }
 
@@ -268,30 +389,61 @@ const resolveFilePath = (
 /**
  * Get the desired path to the configuration.
  */
-const resolveConfigPath = (
+const resolveConfigPathSync = (
   cwd: string,
   searchName: string,
   filePath?: string,
 ): string | undefined => {
-  const resolvedFilePath = resolveFilePath(searchName, filePath);
+  const resolvedFilePath = resolveFilePathSync(searchName, filePath);
   if (resolvedFilePath) {
     return resolvedFilePath;
   }
 
   if (searchName !== DEFAULT_SEARCH_NAME) {
     const resolvedSearchName = resolve(cwd, searchName);
-    const absolutePath = isDirectory(resolvedSearchName)
+    const absolutePath = isDirectorySync(resolvedSearchName)
       ? resolve(resolvedSearchName, 'tsconfig.json')
       : resolvedSearchName;
 
-    return isFile(absolutePath) ? absolutePath : undefined;
+    return isFileSync(absolutePath) ? absolutePath : undefined;
   }
 
-  if (statSync(cwd).isFile()) {
+  if (isFileSync(cwd)) {
     return resolve(cwd);
   }
 
-  const configAbsolutePath = walkForTsConfig(cwd);
+  const configAbsolutePath = walkForTsConfigSync(cwd);
+  return configAbsolutePath ? resolve(configAbsolutePath) : undefined;
+};
+
+/**
+ * Get the desired path to the configuration.
+ */
+const resolveConfigPath = async (
+  cwd: string,
+  searchName: string,
+  filePath?: string,
+): Promise<string | undefined> => {
+  const resolvedFilePath = await resolveFilePath(searchName, filePath);
+
+  if (resolvedFilePath) {
+    return resolvedFilePath;
+  }
+
+  if (searchName !== DEFAULT_SEARCH_NAME) {
+    const resolvedSearchName = resolve(cwd, searchName);
+    const absolutePath = (await isDirectory(resolvedSearchName))
+      ? resolve(resolvedSearchName, 'tsconfig.json')
+      : resolvedSearchName;
+
+    return (await isFile(absolutePath)) ? absolutePath : undefined;
+  }
+
+  if (await isFile(cwd)) {
+    return resolve(cwd);
+  }
+
+  const configAbsolutePath = await walkForTsConfig(cwd);
   return configAbsolutePath ? resolve(configAbsolutePath) : undefined;
 };
 
@@ -308,14 +460,14 @@ const parseTsConfigJson = (jsonString: string): TsConfigJson | undefined => {
 };
 
 /**
- * Loads a tsconfig file while also resolving the extends path.
+ * Synchronously loads a tsconfig file while also resolving the `extends` path.
  */
-const loadTsConfig = (
+const loadTsConfigSync = (
   configFilePath: string,
   extendedPaths: string[],
   ignoreExtends = false,
 ): TsConfigJson | undefined => {
-  if (!existsSync(configFilePath)) return undefined;
+  if (!isFileOrDirectorySync(configFilePath)) return undefined;
 
   const configString = readFileSync(configFilePath, 'utf8');
   const jsonString = StripBom(configString);
@@ -327,15 +479,15 @@ const loadTsConfig = (
   let base: TsConfigJson;
 
   if (parseFilePath(extendedConfig).isPackage) {
-    const newConfigPath = resolvePackage(extendedConfig);
+    const newConfigPath = resolvePackageSync(extendedConfig);
 
     if (!newConfigPath) {
       return config;
-    } else if (isDirectory(newConfigPath)) {
+    } else if (isDirectorySync(newConfigPath)) {
       extendedConfig = join(newConfigPath, DEFAULT_SEARCH_NAME);
-    } else if (isFile(newConfigPath)) {
+    } else if (isFileSync(newConfigPath)) {
       extendedConfig = newConfigPath;
-    } else if (isFile(`${newConfigPath}.json`)) {
+    } else if (isFileSync(`${newConfigPath}.json`)) {
       extendedConfig = `${newConfigPath}.json`;
     }
 
@@ -344,7 +496,7 @@ const loadTsConfig = (
     }
 
     extendedPaths.push(extendedConfig);
-    base = loadTsConfig(extendedConfig, extendedPaths) ?? {};
+    base = loadTsConfigSync(extendedConfig, extendedPaths) ?? {};
   } else {
     if (!extendedConfig.endsWith('.json')) {
       extendedConfig += '.json';
@@ -358,7 +510,81 @@ const loadTsConfig = (
     }
 
     extendedPaths.push(extendedConfigPath);
-    base = loadTsConfig(extendedConfigPath, extendedPaths) ?? {};
+    base = loadTsConfigSync(extendedConfigPath, extendedPaths) ?? {};
+  }
+
+  // baseUrl should be interpreted as relative to the base tsconfig, but we need
+  // to update it so it is relative to the original tsconfig being loaded
+  if (base?.compilerOptions?.baseUrl) {
+    const extendsDir = dirname(extendedConfig);
+    base.compilerOptions.baseUrl = join(
+      extendsDir,
+      base.compilerOptions.baseUrl,
+    );
+  }
+
+  return {
+    ...base,
+    ...config,
+    compilerOptions: {
+      ...base.compilerOptions,
+      ...config.compilerOptions,
+    },
+  };
+};
+
+/**
+ * Loads a tsconfig file while also resolving the `extends` path.
+ */
+const loadTsConfig = async (
+  configFilePath: string,
+  extendedPaths: string[],
+  ignoreExtends = false,
+): Promise<TsConfigJson | undefined> => {
+  if (!(await isFileOrDirectory(configFilePath))) return undefined;
+
+  const configString = await readFile(configFilePath, 'utf8');
+  const jsonString = StripBom(configString);
+  const config = parseTsConfigJson(jsonString);
+  let extendedConfig = config?.extends;
+
+  if (!config || !extendedConfig || ignoreExtends) return config;
+
+  let base: TsConfigJson;
+
+  if (parseFilePath(extendedConfig).isPackage) {
+    const newConfigPath = await resolvePackage(extendedConfig);
+
+    if (!newConfigPath) {
+      return config;
+    } else if (await isDirectory(newConfigPath)) {
+      extendedConfig = join(newConfigPath, DEFAULT_SEARCH_NAME);
+    } else if (await isFile(newConfigPath)) {
+      extendedConfig = newConfigPath;
+    } else if (await isFile(`${newConfigPath}.json`)) {
+      extendedConfig = `${newConfigPath}.json`;
+    }
+
+    if (extendedPaths.includes(extendedConfig)) {
+      return config;
+    }
+
+    extendedPaths.push(extendedConfig);
+    base = (await loadTsConfig(extendedConfig, extendedPaths)) ?? {};
+  } else {
+    if (!extendedConfig.endsWith('.json')) {
+      extendedConfig += '.json';
+    }
+
+    const currentDir = dirname(configFilePath);
+    const extendedConfigPath = join(currentDir, extendedConfig);
+
+    if (extendedPaths.includes(extendedConfigPath)) {
+      return config;
+    }
+
+    extendedPaths.push(extendedConfigPath);
+    base = (await loadTsConfig(extendedConfigPath, extendedPaths)) ?? {};
   }
 
   // baseUrl should be interpreted as relative to the base tsconfig, but we need
@@ -530,15 +756,24 @@ const updateCache = (
 };
 
 /**
- * Get the nearest tsconfig by walking up the directory.
+ * Clears the cache.
  */
-const getTsConfigResult = ({
+export const clearCache = () => {
+  for (const map of Object.values(cacheObject)) {
+    map.clear();
+  }
+};
+
+/**
+ * Synchronously get the nearest tsconfig by walking up the directory.
+ */
+const getTsConfigResultSync = ({
   cwd,
   searchName,
   filePath,
   ignoreExtends,
 }: Except<TsConfigResolverParams, 'cache'>): TsConfigResult => {
-  const configPath = resolveConfigPath(cwd, searchName, filePath);
+  const configPath = resolveConfigPathSync(cwd, searchName, filePath);
 
   if (!configPath) {
     return {
@@ -550,7 +785,7 @@ const getTsConfigResult = ({
   // This path will be mutated to include all paths that have been found.
   const extendedPaths: string[] = [];
 
-  const config = loadTsConfig(configPath, extendedPaths, ignoreExtends);
+  const config = loadTsConfigSync(configPath, extendedPaths, ignoreExtends);
 
   if (!config) {
     return {
@@ -570,6 +805,48 @@ const getTsConfigResult = ({
 };
 
 /**
+ * Get the nearest tsconfig by walking up the directory.
+ */
+const getTsConfigResult = async ({
+  cwd,
+  searchName,
+  filePath,
+  ignoreExtends,
+}: Except<TsConfigResolverParams, 'cache'>): Promise<TsConfigResult> => {
+  const configPath = await resolveConfigPath(cwd, searchName, filePath);
+
+  if (!configPath) {
+    return {
+      exists: false,
+      reason: TsConfigErrorReason.NotFound,
+    };
+  }
+
+  // This path will be mutated to include all paths that have been found.
+  const extendedPaths: string[] = [];
+
+  const config = await loadTsConfig(configPath, extendedPaths, ignoreExtends);
+
+  if (!config) {
+    return {
+      exists: false,
+      reason: TsConfigErrorReason.InvalidConfig,
+      path: configPath,
+    };
+  }
+
+  return {
+    exists: true,
+    path: configPath,
+    extendedPaths,
+    config,
+    isCircular: extendedPaths.includes(configPath),
+  };
+};
+
+export { TsConfigJson };
+
+/**
  * Resolve the `tsconfig` file synchronously. Walks up the file tree until it
  * finds a file that matches the searchName.
  *
@@ -582,7 +859,7 @@ const getTsConfigResult = ({
  * If a non-default caching strategy is provided the returned result might be
  * from the cache instead.
  */
-export function tsconfigResolver({
+export function tsconfigResolverSync({
   filePath,
   cwd = process.cwd(),
   cache: shouldCache = filePath ? CacheStrategy.Always : CacheStrategy.Never,
@@ -602,12 +879,13 @@ export function tsconfigResolver({
     return cache;
   }
 
-  const result = getTsConfigResult({
+  const result = getTsConfigResultSync({
     cwd,
     searchName,
     filePath,
     ignoreExtends,
   });
+
   updateCache(
     { cwd, cache: cacheStrategy, searchName, filePath, ignoreExtends },
     result,
@@ -617,12 +895,47 @@ export function tsconfigResolver({
 }
 
 /**
- * Clears the cache.
+ * Resolve the `tsconfig` file. Walks up the file tree until it
+ * finds a file that matches the searchName.
+ *
+ * @param options - `TsConfigResolverOptions`.
+ *
+ * @remarks
+ *
+ * If a non-default caching strategy is provided the returned result might be
+ * from the cache instead.
  */
-export const clearCache = () => {
-  for (const map of Object.values(cacheObject)) {
-    map.clear();
-  }
-};
+export async function tsconfigResolver({
+  filePath,
+  cwd = process.cwd(),
+  cache: shouldCache = filePath ? CacheStrategy.Always : CacheStrategy.Never,
+  searchName = DEFAULT_SEARCH_NAME,
+  ignoreExtends = false,
+}: TsConfigResolverOptions = {}): Promise<TsConfigResult> {
+  const cacheStrategy = convertCacheToStrategy(shouldCache);
+  const cache = getCache({
+    cwd,
+    cache: cacheStrategy,
+    searchName,
+    filePath,
+    ignoreExtends,
+  });
 
-export { TsConfigJson };
+  if (cache) {
+    return cache;
+  }
+
+  const result = await getTsConfigResult({
+    cwd,
+    searchName,
+    filePath,
+    ignoreExtends,
+  });
+
+  updateCache(
+    { cwd, cache: cacheStrategy, searchName, filePath, ignoreExtends },
+    result,
+  );
+
+  return result;
+}
