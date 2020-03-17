@@ -1,3 +1,19 @@
+## [3.0.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.2.0...v3.0.0) (2020-03-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* `tsconfigResolver` is now an async function. To
+maintain previous behaviour you can use `tsconfigResolverSync`.
+* **cache:** `cacheStrategy` option has been renamed to `cache`.
+
+- It now accepts `boolean`'s and `string`s.
+
+### Features
+
+* export both a sync and async resolver ([83c6631](https://github.com/ifiokjr/tsconfig-resolver/commit/83c66319d25c95480dd6d5ce55574dacc871e3de))
+* **cache:** accept `boolean` values for `cache` ([24bf910](https://github.com/ifiokjr/tsconfig-resolver/commit/24bf91049e4311faf3882ec29055a8359162a8e5))
+
 ## [2.2.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.1.1...v2.2.0) (2020-03-15)
 
 ### Features
