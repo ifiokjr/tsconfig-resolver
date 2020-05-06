@@ -67,6 +67,7 @@
     "trailingComma": "all"
   },
   "resolutions": {
+    "prettier": "^2",
     "mem": ">=4",
     "minimist": ">=1.2.2"
   },
