@@ -1,6 +1,6 @@
 {
   "name": "tsconfig-resolver",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Walk up the tree to resolve `tsconfig.json` configuration objects.",
   "keywords": [
     "tsconfig",

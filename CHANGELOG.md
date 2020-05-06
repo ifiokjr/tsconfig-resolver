@@ -1,3 +1,10 @@
+### [3.0.1](https://github.com/ifiokjr/tsconfig-resolver/compare/v3.0.0...v3.0.1) (2020-05-06)
+
+
+### Bug Fixes
+
+* upgrade dependencies ([6f24a86](https://github.com/ifiokjr/tsconfig-resolver/commit/6f24a8677130a952db67254e81865c00568417ba))
+
 ## [3.0.0](https://github.com/ifiokjr/tsconfig-resolver/compare/v2.2.0...v3.0.0) (2020-03-17)
 
 
