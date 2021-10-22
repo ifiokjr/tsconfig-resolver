@@ -29,6 +29,10 @@
     "walking",
     "path"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ifiokjr/tsconfig-resolver.git"
+  },
   "funding": "https://github.com/sponsors/ifiokjr",
   "license": "MIT",
   "author": {
