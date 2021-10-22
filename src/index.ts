@@ -197,7 +197,7 @@ const walkForTsConfigSync = (directory: string): string | undefined => {
     return configPath;
   }
 
-  const parentDirectory = join(directory, '../');
+  const parentDirectory = resolve(directory, '../');
 
   // If we reached the top
   if (directory === parentDirectory) {
@@ -219,7 +219,7 @@ const walkForTsConfig = async (
   }
 
   // Step up one level in the directory path.
-  const parentDirectory = join(directory, '../');
+  const parentDirectory = resolve(directory, '../');
 
   // If we reached the top
   if (directory === parentDirectory) {
